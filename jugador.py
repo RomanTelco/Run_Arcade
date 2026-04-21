@@ -185,30 +185,65 @@ class Jugador:
     
     def dibujar(self,pantalla):
         #Dibujamos al personaje principal
-        color_cuerpo = Colores['Jugador']
+        color_base = Colores['Jugador']     #Rojo
+        color_sombre = (180,0,0)            #Rojo oscuro
+        color_luz = (255,80,80)             #Rojo claro         
+        
         if self.invencible and self.tiempo_invencible % 10 < 5:
             color_cuerpo = (255,255,255)
+            color_sombra = (200,200,200)
+            color_luz = (255,255,255)
             
         #Cuerpo del personaje principal
-        pygame.draw.rect(pantalla, color_cuerpo, self.rect)
+        sombra_rect = pygame.Rect(self.x + 5, self.y + 5, self.ancho, self.alto)
+        pygame.draw.rect(pantalla, color_sombra, sombra_rect)
+        
+        cuerpo_rect = pygame.Rect(self.x, self.y, self.ancho, self.alto)
+        pygame.draw.rect(pantalla, color_base, cuerpo_rect)
+        
+        #Degradado lateral izquierdo
+        pygame.draw.rect(pantalla, color_sombra, (self.x, self.y, 8, self.alto))
+        
+        #Degradado lateral derecho
+        pygame.draw.rect(pantalla, color_luz, (self.x + self.ancho - 8, self.y, 8, self.alto))
         
         #Cabeza
-        cabeza_rect = pygame.Rect(self.x + 10, self.y, self.ancho - 20, 25)
-        pygame.draw.rect(pantalla, Colores['Jugador_piel'], cabeza_rect)
+        cabeza_rect = pygame.Rect(self.x + 5, self.y - 5, self.ancho - 10, 30)
+        pygame.draw.rect(pantalla, color_base, cabeza_rect)
+        
+        #Parte superior de la cabeza redondeada
+        pygame.draw.rect(pantalla, color_base, (self.x + 5, self.y - 8, self.ancho - 10, 15))
+
+        #Sombra debajo de la cabeza
+        pygame.draw.rect(pantalla, color_sombra, (self.x + 5, self.y + 20, self.ancho - 10, 5))
         
         #Ojos
         ojo_offset = 0
         if self.estado == 'corriendo':
             ojo_offset = math.sin(self.animacion_frame * 0.8) * 2
-        ojo_izquierdo = (self.x + 15 + ojo_offset, self.y + 10)
-        ojo_derecho = (self.x + self.ancho -15 + ojo_offset, self.y + 10)
-        pygame.draw.circle(pantalla, (0,0,0), ojo_izquierdo, 4)
-        pygame.draw.circle(pantalla, (0,0,0), ojo_derecho, 4)
+        
+        ojo_izquierdo_fondo = (self.x + 12 + ojo_offset, self.y + 5)
+        ojo_derecho_fondo = (self.x + self.ancho - 12 + ojo_offset, self.y + 5)
+        ojo_izquierdo_blanco = (self.x + 12 + ojo_offset, self.y + 4)
+        ojo_derecho_blanco = (self.x + self.ancho - 12 + ojo_offset, self.y + 4)
+        pygame.draw.circle(pantalla, (30,30,30), ojo_izquierdo_fondo, 6)
+        pygame.draw.circle(pantalla, (30,30,30), ojo_derecho_fondo, 6)
+        pygame.draw.circle(pantalla, (255,255,255), ojo_izquierdo_blanco, 4)
+        pygame.draw.circle(pantalla, (255,255,255), ojo_derecho_blanco, 4)
+        
         
         #Pupilas
         direccion_offset = 2 if self.mira_a_derecha else -2
-        pygame.draw.circle(pantalla, (255,255,255), (ojo_izquierdo[0] + direccion_offset, ojo_izquierdo[1]), 2)
-        pygame.draw.circle(pantalla, (255,255,255), (ojo_derecho[0] + direccion_offset,ojo_derecho[1]), 2)
+        pupila_izquierda = (self.x + 12 + ojo_offset + direccion_offset, self.y + 4)
+        pupila_derecha = (self.x + self.ancho - 12 + ojo_offset + direccion_offset, self.y + 4)
+        pygame.draw.circle(pantalla, (0,0,0), pupila_izquierda, 3)
+        pygame.draw.circle(pantalla, (0,0,0), pupila_derecha, 3)
+
+        #Brillo en los ojos
+        brillo_izq = (self.x + 10 + ojo_offset + direccion_offset, self.y + 2)
+        brillo_der = (self.x + self.ancho - 14 + ojo_offset + direccion_offset, self.y + 2)
+        pygame.draw.circle(pantalla, (255,255,255), brillo_izq, 1)
+        pygame.draw.circle(pantalla, (255,255,255), brillo_der, 1)
         
         #Brazos
         brazo_offset = 0
