@@ -249,8 +249,12 @@ class Jugador:
         brazo_offset = 0
         if self.estado == 'corriendo':
             brazo_offset = math.sin(self.animacion_frame * 0.8) * 15
-        pygame.draw.line(pantalla, color_cuerpo, (self.x + 5,self.y + 30), (self.x - 10 - brazo_offset, self.y + 40),8)
-        pygame.draw.line(pantalla, color_cuerpo, (self.x + self.ancho - 5,self.y + 30), (self.x + self.ancho + 10 + brazo_offset, self.y + 40),8)
+            
+        brazo_izq_puntos = [(self.x + 5, self.y + 30), (self.x - 10 - brazo_offset, self.y + 40), (self.x - 5 - brazo_offset, self.y + 45), (self.x + 10, self.y + 35)]
+        pygame.draw.polygon(pantalla, color_sombra, brazo_izq_puntos)
+        
+        brazo_der_puntos = [(self.x + self.ancho - 5, self.y + 30), (self.x + self.ancho + 10 - brazo_offset, self.y + 40), (self.x + self.ancho + 5 + brazo_offset, self.y + 45), (self.x + self.ancho - 10, self.y + 35)]
+        pygame.draw.polygon(pantalla, color_luz, brazo_der_puntos)
     
         #Piernas
         pierna_offset = 0
