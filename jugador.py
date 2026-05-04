@@ -186,7 +186,7 @@ class Jugador:
     def dibujar(self,pantalla):
         #Dibujamos al personaje principal
         color_base = Colores['Jugador']     #Rojo
-        color_sombre = (180,0,0)            #Rojo oscuro
+        color_sombra = (180,0,0)            #Rojo oscuro
         color_luz = (255,80,80)             #Rojo claro         
         
         if self.invencible and self.tiempo_invencible % 10 < 5:
@@ -260,16 +260,39 @@ class Jugador:
         pierna_offset = 0
         if self.estado == 'corriendo':
             pierna_offset = math.sin(self.animacion_frame * 0.8) * 10
-        pygame.draw.line(pantalla, Colores['Jugador_tipo'], (self.x + 10, self.y + self.alto -10), (self.x + 5 - pierna_offset, self.y + self.alto +20), 10)
-        pygame.draw.line(pantalla, Colores['Jugador_tipo'], (self.x + self.ancho - 10, self.y + self.alto -10),(self.x + self.ancho - 5 + pierna_offset, self.y + self.alto +20), 10)
+            
+        pierna_izq_puntos = [(self.x + 8, self.y + self.alto - 10), (self.x + 3 - pierna_offset, self.y + self.alto + 15), (self.x + 12 - pierna_offset, self.y + self.alto + 15), (self.x + 15, self.y + self.alto - 5)]
+        pygame.draw.polygon(pantalla, color_sombra, pierna_izq_puntos)
+        
+        pierna_der_puntos = [(self.x - 8, self.y + self.alto - 10), (self.x - 3 + pierna_offset, self.y + self.alto + 15), (self.x + self.ancho - 12 + pierna_offset, self.y + self.alto + 15), (self.x + self.ancho - 15, self.y + self.alto - 5)]
+        pygame.draw.polygon(pantalla, color_luz, pierna_der_puntos)
+        
+        #Zapatos
+        #Izquierdo
+        pygame.draw.rect(pantalla, (50,50,50), (self.x + 5, self.y + self.alto + 10, 12, 8))
+        pygame.draw.rect(pantalla, (30,30,30), (self.x + 5, self.y + self.alto + 10, 12, 3))
+        
+        #Derecho
+        pygame.draw.rect(pantalla, (50,50,50), (self.x + self.ancho - 17, self.y + self.alto + 10, 12, 8))
+        pygame.draw.rect(pantalla, (30,30,30), (self.x + self.ancho - 17, self.y + self.alto + 10, 12, 3))
+        
         
         #Botones
-        pygame.draw.circle(pantalla, Colores['Jugador_accesorios'], (self.x + self.ancho//2, self.y + 40), 4)
+        #Superior
+        pygame.draw.circle(pantalla, Colores['Jugador_accesorios'], (self.x + self.ancho//2, self.y + 35), 5)
+        pygame.draw.circle(pantalla, (200,200,0), (self.x + self.ancho//2, self.y + 35), 5)
+        
         
         #Indicador de balas
         if self.balas > 0:
-            pygame.draw.circle(pantalla, Colores['Bala'], (self.x + self.ancho//2, self.y - 10), 5)
-        
+            pygame.draw.circle(pantalla, (200,200,0), (self.x + self.ancho//2, self.y - 8), 7)
+            pygame.draw.circle(pantalla, Colores['Bala'], (self.x + self.ancho // 2, self.y - 8), 5)
+            pygame.draw.circle(pantalla, (250,250,200), (self.x + self.ancho//2 - 2, self.y - 10), 2)
+            
+        #Sombra en el suelo
+        sombra_suelo = pygame.Surface((self.ancho - 10, 8), pygame.SRCALPHA)
+        sombra_suelo.fill((0,0,0,100))
+        pantalla.blit(sombra_suelo, (self.x + 5, self.y + self.y + self.alto + 5))
     def recibir_daño(self):
         #Daño que se hace al personaje principal
         if not self.invencible:
