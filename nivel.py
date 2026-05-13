@@ -37,9 +37,13 @@ class Nivel:
         cantidad = self.config['Enemigos']
         
         #Bloque
-        for i in range(cantidad['Bloque']):
-            x=random.randint(300, 5000)
-            y=self.mundo.suelo_y - Enemigos['Bloque']['Alto']
+        for i in range(cantidad['Bloque'] * 2):
+            x=random.randint(200, 8000)
+            if random.random() < 0.7:
+                y=self.mundo.suelo_y - Enemigos['Bloque']['Alto']
+            else:
+                y = random.randint(300, 500)
+                
             self.obstaculos.append(Obstaculo('Bloque', x, y, self.numero +1))
             
         #Andante
@@ -53,6 +57,16 @@ class Nivel:
             x=random.randint(700, 8000)
             y=random.randint(100, 400)
             self.obstaculos.append(Obstaculo('Volador', x, y, self.numero +1))
+            
+        bloques_extra = 20
+        for i in range(bloques_extra):
+            x = random.randint(300, 9000)
+            #Alterno suelo y cielo
+            if i % 3 == 0:
+                y = random.randint(300, 500)
+            else:
+                y = self.mundo.suelo_y - Enemigos['Bloque']['Alto']
+            self.obstaculos.append(Obstaculo('Bloque', x, y, self.numero +1))    
     
     def generar_monedas(self):
         #Generamos monedas a utilizar en el juego

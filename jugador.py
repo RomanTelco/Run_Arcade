@@ -20,6 +20,7 @@ class Jugador:
         
         #Salto del jugador
         self.saltando = False
+        self.ultimo_salto = False
         
         #Fisica del jugador principal
         self.velocidad_x = 0
@@ -113,12 +114,22 @@ class Jugador:
             if self.en_el_suelo:
                 self.estado = 'quieto'
                 
-        #Salto del personaje pricipal
-        if (teclas[pygame.K_SPACE] or teclas[pygame.K_w] or teclas[pygame.K_UP]) and self.en_el_suelo:
-            self.saltar()
-        elif (teclas[pygame.K_SPACE] or teclas[pygame.K_w] or teclas[pygame.K_UP]) and not self.salto_doble:
-            self.salto_doble = True
-            self.velocidad_y = Fuerza_Salto * 0.8
+        salto_actual = teclas[pygame.K_SPACE] or teclas[pygame.K_w] or teclas[pygame.K_UP]
+        
+        if salto_actual and not self.ultimo_salto:
+            if self.en_el_suelo:
+                self.velocidad_y = Fuerza_Salto
+                self.en_el_suelo = False
+                self.saltando = True
+                self.salto_doble = False
+                self.estado = 'saltando'
+            elif not self.en_el_suelo and not self.salto_doble and self.saltando:
+                self.salto_doble = True
+                self.velocidad_y = Fuerza_Salto * 0.8
+                self.saltando = True
+                self.estado = 'saltando'
+        self.ultimo_salto = salto_actual
+     
         
     def aplicar_fisica(self):
         self.velocidad_x += self.aceleracion_x
@@ -145,6 +156,7 @@ class Jugador:
             self.velocidad_y = Fuerza_Salto
             self.saltando = True
             self.en_el_suelo = False
+            self.salto_doble = False
             self.estado = 'saltando'
             
     def disparar(self):
@@ -292,7 +304,7 @@ class Jugador:
         #Sombra en el suelo
         sombra_suelo = pygame.Surface((self.ancho - 10, 8), pygame.SRCALPHA)
         sombra_suelo.fill((0,0,0,100))
-        pantalla.blit(sombra_suelo, (self.x + 5, self.y + self.y + self.alto + 5))
+        pantalla.blit(sombra_suelo, (self.x + 5, self.y + self.alto + 5))
     def recibir_daño(self):
         #Daño que se hace al personaje principal
         if not self.invencible:
