@@ -28,6 +28,10 @@ class Nivel:
         self.obstaculos = []
         self.monedas = []
         
+        #generacion de obstaculos
+        self.ultima_posicion_generada = 0
+        self.distancia_entre_obstaculos = 350
+        
         #Como se generan los elementos
         self.generar_enemigos()
         self.generar_monedas()
@@ -37,12 +41,9 @@ class Nivel:
         cantidad = self.config['Enemigos']
         
         #Bloque
-        for i in range(cantidad['Bloque'] * 2):
+        for i in range(15):
             x=random.randint(200, 8000)
-            if random.random() < 0.7:
-                y=self.mundo.suelo_y - Enemigos['Bloque']['Alto']
-            else:
-                y = random.randint(300, 500)
+            y=self.mundo.suelo_y - Enemigos['Bloque']['Alto']
                 
             self.obstaculos.append(Obstaculo('Bloque', x, y, self.numero +1))
             
@@ -68,6 +69,24 @@ class Nivel:
                 y = self.mundo.suelo_y - Enemigos['Bloque']['Alto']
             self.obstaculos.append(Obstaculo('Bloque', x, y, self.numero +1))    
     
+    def generar_nuevo_obstaculo(self, posicion_x):
+        rand= random.random()
+        if rand < 0.6:
+            tipo = 'Bloque'
+            if random.random() < 0.8:
+                y = self.mundo.suelo_y - Enemigos['Bloque']['Alto']
+            else:
+                y = random.randint(300, 500)
+        elif rand < 0.8:
+            tipo = 'Andante'
+            y = self.mundo.suelo_y - Enemigos['Andante']['Alto']
+        else:
+            tipo = 'Volador'
+            y=random.randint(100, 400)
+            
+        self.obstaculos.append(Obstaculo(tipo, posicion_x, y, self.numero + 1))
+                    
+    
     def generar_monedas(self):
         #Generamos monedas a utilizar en el juego
         for i in range(self.config['Monedas']):
@@ -81,6 +100,16 @@ class Nivel:
         #Tiempo
         tiempo_transcurrido = (pygame.time.get_ticks()-self.tiempo_inicio) // 1000
         self.tiempo_restante = max(0, self.tiempo_limite - tiempo_transcurrido)
+        
+        distancia_actual = abs(self.mundo.distancia_recorrida)
+        if distancia_actual - self.ultima_posicion_generada > self.distancia_entre_obstaculos:
+            nueva_pos = distancia_actual + self.distancia_entre_obstaculos + random.randint(50, 200)
+            self.generar_nuevo_obstaculo(nueva_pos)
+            self.ultima_posicion_generada = distancia_actual
+            
+            if random.random() < 0.3:
+                nueva_pos2 = nueva_pos + random.randint(100, 250)
+                self.generar_nuevo_obstaculo(nueva_pos2)
         
         #Obstaculo
         for obstaculo in self.obstaculos[:]:
