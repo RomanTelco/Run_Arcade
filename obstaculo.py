@@ -62,21 +62,19 @@ class Obstaculo:
         if not self.activo:
             return
         
-        #Movimiento en la pantalla principal
-        self.x += velocidad_mundo
+        #Rectangulo de colision
+        self.rect.x = self.x
+        self.rect.y = self.y
         
-        #Movimiento estatico
-        if self.estatico:
-            pass
         
         #Movimiento terrestre
-        elif self.terrestre:
-            self.x += self.velocidad_x
+        if self.terrestre:
             #Cambio de direccion
             self.tiempo_cambio += 1
             if self.tiempo_cambio > 120:
                 self.velocidad_x *= -1
                 self.tiempo_cambio = 0
+            self.x += self.velocidad_x
                 
             #Gravedad para el obstaculo
             self.velocidad_y += Gravedad * 0.5
@@ -87,14 +85,18 @@ class Obstaculo:
             if self.y >= suelo_y -self.alto:
                 self.y = suelo_y - self.alto
                 self.velocidad_y = 0
+            
+            #Actualizamos rect despues del movimiento
+            self.rect.x = self.x
+            self.rect.y = self.y
         
         #Movimiento volador
         elif self.aereo:
-            self.x += self.velocidad_x
             self.tiempo_vuelo += 0.1
             amplitud = 50
             frecuencia = 0.05
             self.y = self.altura_inicial + math.sin(self.tiempo_vuelo * frecuencia) * amplitud
+            self.rect.y = self.y
             
             #Cambio aleatorio de altura
             if random.random() < 0.005:
@@ -115,7 +117,7 @@ class Obstaculo:
         self.rect.y = self.y
             
         #Cuando sale de la pantalla se elimina el obstaculo
-        if self.x < -100 or self.x > Ventana_ancho + 100:
+        if self.x < -200 or self.x > Ventana_ancho + 500:
             self.activo = False
     
     #Dibujamos el obstaculo

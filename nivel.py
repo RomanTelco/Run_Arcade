@@ -28,97 +28,122 @@ class Nivel:
         self.obstaculos = []
         self.monedas = []
         
-        #generacion de obstaculos
-        self.ultima_posicion_generada = 0
-        self.distancia_entre_obstaculos = 350
+        #Generacion de obstaculos
+        self.enemigos_restantes = {'Bloque': self.config['Enemigos']['Bloque'], 'Andante': self.config['Enemigos']['Andante'], 'Volador': self.config['Enemigos']['Volador']}
+        
+        #Timer para generacion continua
+        self.ultimo_tiempo_generacion = pygame.time.get_ticks()
+        self.tiempo_entre_generaciones = 2000 
+        
+        #Contador de oleadas
+        self.oleada_actual = 0
         
         #Como se generan los elementos
-        self.generar_enemigos()
         self.generar_monedas()
         
-    def generar_enemigos(self):
-        #Generamos enemigos para el nivel
-        cantidad = self.config['Enemigos']
+        #Para debugear
+        print(f"\n=== NIVEL {self.config['Nombre']} ===")
+        print(f"Enemigos por generar: {self.enemigos_restantes}")
         
-        #Bloque
-        for i in range(15):
-            x=random.randint(200, 8000)
-            y=self.mundo.suelo_y - Enemigos['Bloque']['Alto']
+        #Generamos la primera oleada
+        self.generar_oleada()
+        
+        
+    def generar_oleada(self):
+        #Generamos enemigos para el nivel
+        self.oleada_actual += 1
+        
+        #Calculo de cuantos enemigos se generan
+        total_restantes = sum(self.enemigos_restantes.values())
+        if total_restantes <= 0:
+            return
+        
+        #Numero de enemigos por oleada
+        num_enemigos = min(random.randint(2,5), total_restantes)
+        print(f"\n --- Oleada {self.oleada_actual} ---")
+        print(f"Generando {num_enemigos} enemigos")
+        
+        for i in range(num_enemigos):
+            #Tipo de enemigo
+            tipos_disponibles = []
+            if self.enemigos_restantes['Bloque'] > 0:
+                tipos_disponibles.append('Bloque')
+            if self.enemigos_restantes['Andante'] > 0:
+                tipos_disponibles.append('Andante')
+            if self.enemigos_restantes['Volador'] > 0:
+                tipos_disponibles.append('Volador')
                 
-            self.obstaculos.append(Obstaculo('Bloque', x, y, self.numero +1))
+            if not tipos_disponibles:
+                break
             
-        #Andante
-        for i in range(cantidad['Andante']):
-            x=random.randint(500, 6000)
-            y=self.mundo.suelo_y - Enemigos['Andante']['Alto']
-            self.obstaculos.append(Obstaculo('Andante', x, y, self.numero +1))
+            tipo = random.choice(tipos_disponibles)
             
-        #Volador
-        for i in range(cantidad['Volador']):
-            x=random.randint(700, 8000)
-            y=random.randint(100, 400)
-            self.obstaculos.append(Obstaculo('Volador', x, y, self.numero +1))
-            
-        bloques_extra = 20
-        for i in range(bloques_extra):
-            x = random.randint(300, 9000)
-            #Alterno suelo y cielo
-            if i % 3 == 0:
-                y = random.randint(300, 500)
+            #Posiciones en los que aparecen los enemigos
+            if len(self.obstaculos) > 0:
+                #Aparicion despues del ultimo enemigo
+                ultimo_x = max([o.x for o in self.obstaculos])
+                x = ultimo_x + random.randint(300, 600)
             else:
-                y = self.mundo.suelo_y - Enemigos['Bloque']['Alto']
-            self.obstaculos.append(Obstaculo('Bloque', x, y, self.numero +1))    
-    
-    def generar_nuevo_obstaculo(self, posicion_x):
-        rand= random.random()
-        if rand < 0.6:
-            tipo = 'Bloque'
-            if random.random() < 0.8:
-                y = self.mundo.suelo_y - Enemigos['Bloque']['Alto']
-            else:
-                y = random.randint(300, 500)
-        elif rand < 0.8:
-            tipo = 'Andante'
-            y = self.mundo.suelo_y - Enemigos['Andante']['Alto']
-        else:
-            tipo = 'Volador'
-            y=random.randint(100, 400)
+                x = Ventana_ancho + random.randint(100, 300)
+             
+            #Bloque    
+            if tipo == 'Bloque':
+                if random.random() < 0.7:
+                    y = self.mundo.suelo_y - Enemigos['Bloque']['Alto']
+                else:
+                    y = random.randint(200, 500)
             
-        self.obstaculos.append(Obstaculo(tipo, posicion_x, y, self.numero + 1))
-                    
+            elif tipo == 'Andante':
+                y = self.mundo.suelo_y - Enemigos['Andante']['Alto']
+            
+            #Volador
+            else:
+                y = random.randint(100, 400)
+                
+            #Se crea el enemigo
+            self.obstaculos.append(Obstaculo(tipo, x, y, self.numero + 1))
+            self.enemigos_restantes[tipo] -= 1
+            print(f" - {tipo} en posicion x = {x: .0f}")
+        
+        #Se muestran enemigos resatntes
+        print(f"Restantes: {self.enemigos_restantes}")
     
     def generar_monedas(self):
         #Generamos monedas a utilizar en el juego
         for i in range(self.config['Monedas']):
-            x=random.randint(200, 10000)
-            y=random.randint(200, 500)
+            x=random.randint(200, 5000)
+            y=random.randint(150, 500)
             self.monedas.append({'x':x, 'y':y, 'radio': 12, 'animacion': 0, 'recolectada': False})
     
     def actualizar(self, jugador, balas):
         #Actualizamos el nivel
         
         #Tiempo
-        tiempo_transcurrido = (pygame.time.get_ticks()-self.tiempo_inicio) // 1000
+        tiempo_actual = pygame.time.get_ticks()
+        tiempo_transcurrido = (tiempo_actual - self.tiempo_inicio) // 1000
         self.tiempo_restante = max(0, self.tiempo_limite - tiempo_transcurrido)
         
-        distancia_actual = abs(self.mundo.distancia_recorrida)
-        if distancia_actual - self.ultima_posicion_generada > self.distancia_entre_obstaculos:
-            nueva_pos = distancia_actual + self.distancia_entre_obstaculos + random.randint(50, 200)
-            self.generar_nuevo_obstaculo(nueva_pos)
-            self.ultima_posicion_generada = distancia_actual
-            
-            if random.random() < 0.3:
-                nueva_pos2 = nueva_pos + random.randint(100, 250)
-                self.generar_nuevo_obstaculo(nueva_pos2)
+        #Generacion de nuevas oleadas
+        total_restantes = sum(self.enemigos_restantes.values())
+        if total_restantes > 0:
+            if tiempo_actual - self.ultimo_tiempo_generacion > self.tiempo_entre_generaciones:
+                self.generar_oleada()
+                self.ultimo_tiempo_generacion = tiempo_actual
+                #Reducimos tiempo entre oleadas durante el nivel
+                if self.tiempo_entre_generaciones > 800:
+                    self.tiempo_entre_generaciones -= 50
         
-        #Obstaculo
+        #Actualizamos obstaculos
         for obstaculo in self.obstaculos[:]:
             if not obstaculo.activo:
                 self.obstaculos.remove(obstaculo)
                 continue
+            
+            #Movemos el obstaculo segun la velocidad del nivel
+            obstaculo.x += self.mundo.velocidad
             obstaculo.actualizar(self.mundo.velocidad)
             
-            #Verificamos daño por bala
+            #Verificamos el daño hecho por las balas
             for bala in balas[:]:
                 puntos = obstaculo.recibir_daño_bala(bala)
                 if puntos > 0:
@@ -126,10 +151,12 @@ class Nivel:
                     if bala in balas:
                         balas.remove(bala)
             
-            #Verificamos daño con el jugador
+            #Verificamos la colision con el jugador
             if obstaculo.colisionar_jugador(jugador):
                 if not obstaculo.activo:
-                    self.obstaculos.remove(obstaculo)
+                    if obstaculo in self.obstaculos:
+                        self.obstaculos.remove(obstaculo)
+        
                 
         #Monedas
         for moneda in self.monedas[:]:
@@ -148,14 +175,25 @@ class Nivel:
                 moneda['recolectada'] = True
                 jugador.recolectar_moneda()
         
+        
+        #Generar nuevas monedas
+        if len(self.monedas) < 20:
+            nuevas_monedas = random.randint(3, 8)
+            for i in range(nuevas_monedas):
+                x=self.mundo.distancia_recorrida + random.randint(400, 1000)
+                y= random.randint(150, 500)
+                self.monedas.append({'x':x, 'y':y, 'radio':12, 'animacion':0, 'recolectada': False})
+        
         #Nivel completado?
         if self.mundo.progreso >= 100:
             self.completado = True
             jugador.puntuacion += self.tiempo_restante * 10
+            print(f"\n Nivel Completado! Puntuacion: {jugador.puntuacion}")
         
         #Tiempo terminado?
         if self.tiempo_restante <= 0:
             jugador.morir()
+            print("\n Tiempo Agotado!")
     
     def dibujar(self,pantalla):
         #Elementos del nivel

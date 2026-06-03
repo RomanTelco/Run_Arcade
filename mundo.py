@@ -20,6 +20,7 @@ class Mundo:
         self.velocidad = self.nivel_config['Velocidad']
         self.distancia_recorrida = 0
         self.progreso = 0
+        self.distancia_total = 8000
         
         #Elementos del escenario
         self.suelo_y = Ventana_alto - 150
@@ -55,8 +56,8 @@ class Mundo:
         #Actualizamos la posicion de todos los elementos
         
         #Distancia recorrida
-        self.distancia_recorrida -= self.velocidad
-        self.progreso = min(100, (self.distancia_recorrida / 10000)*100)
+        self.distancia_recorrida += abs(self.velocidad)
+        self.progreso = min(100, (self.distancia_recorrida / self.distancia_total)*100)
         
         #Movimiento de las nubes
         for nube in self.nubes:
