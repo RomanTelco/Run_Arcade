@@ -100,8 +100,8 @@ Niveles = [
         {   
             #Tutorial
             'Nombre' : 'Tutorial',
-            'Tiempo_limite' : 300,
-            'Enemigos' : {'Bloque':15, 'Andante':5, 'Volador':0},
+            'Tiempo_limite' : 50,
+            'Enemigos' : {'Bloque':15, 'Andante':10, 'Volador':0},
             'Monedas':30,
             'Velocidad': -4,
         },
@@ -109,8 +109,8 @@ Niveles = [
         {
             #Nivel 1: Facil
             'Nombre' : 'Nivel 1',
-            'Tiempo_limite' : 280,
-            'Enemigos' : {'Bloque':10, 'Andante':10, 'Volador':5},
+            'Tiempo_limite' : 180,
+            'Enemigos' : {'Bloque':10, 'Andante':15, 'Volador':5},
             'Monedas':40,
             'Velocidad': -5,
         },
@@ -118,8 +118,8 @@ Niveles = [
         {
             #Nivel 2: Intermedio
             'Nombre' : 'Nivel 2',
-            'Tiempo_limite' : 250,
-            'Enemigos' : {'Bloque':8, 'Andante':8, 'Volador':12},
+            'Tiempo_limite' : 220,
+            'Enemigos' : {'Bloque':18, 'Andante':20, 'Volador':12},
             'Monedas':50,
             'Velocidad': -6,
         },
@@ -128,7 +128,7 @@ Niveles = [
             #Nivel 3: Dificil
             'Nombre' : 'Nivel 3',
             'Tiempo_limite' : 220,
-            'Enemigos' : {'Bloque':12, 'Andante':15, 'Volador':15},
+            'Enemigos' : {'Bloque':30, 'Andante':25, 'Volador':20},
             'Monedas':60,
             'Velocidad': -7,
         }

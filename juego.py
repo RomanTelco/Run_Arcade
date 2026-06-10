@@ -30,6 +30,8 @@ class Juego:
         self.nivel_actual = 0
         self.puntuacion_total = 0
         
+        self.mensaje_preparacion = ""
+        
         #Elementos del juego
         self.jugador = None
         self.mundo = None
@@ -43,9 +45,9 @@ class Juego:
         self.fuente_muy_pequeña = pygame.font.Font(None, 24)
         
         #Inicializacion del juego
-        self.inicializar_juego()
+        self.inicializar_juego(mostrar_preparacion = False)
         
-    def inicializar_juego(self):
+    def inicializar_juego(self, mostrar_preparacion = False):
         #Creacion del mundo del juego
         self.mundo = Mundo(self.nivel_actual)
         
@@ -58,6 +60,10 @@ class Juego:
         
         #Renovar en pantalla el numero de balas
         self.balas = []
+        
+        if mostrar_preparacion:
+            self.mensaje_preparacion = Niveles[self.nivel_actual]['Nombre']
+            self.estado = 'Preparando Nivel'
         
     def manejar_eventos(self):
         #Eventos del juego
@@ -72,10 +78,17 @@ class Juego:
                 #Menu del juego
                 if self.estado == 'MENU':
                     if evento.key == pygame.K_RETURN:
-                        self.estado = 'JUGANDO'
+                        self.mensaje_preparacion = Niveles[self.nivel_actual]['Nombre']
+                        self.estado = 'Preparando Nivel'
                     elif evento.key == pygame.K_ESCAPE:
                         pygame.quit()
                         sys.exit()
+                        
+                elif self.estado == 'Preparando Nivel':
+                    if evento.key == pygame.K_RETURN:
+                        self.estado = 'JUGANDO'
+                        #Se reinicia el contador de tiempo del nivel
+                        self.nivel.tiempo_inicio = pygame.time.get_ticks()
                 
                 #Durante el juego
                 elif self.estado == 'JUGANDO':
@@ -89,8 +102,7 @@ class Juego:
                     if evento.key == pygame.K_r:
                         self.nivel_actual = 0
                         self.puntuacion_total = 0
-                        self.inicializar_juego()
-                        self.estado = 'MENU'
+                        self.inicializar_juego(mostrar_preparacion = False)
             
             #Click para el raton del disparo
             if evento.type == pygame.MOUSEBUTTONDOWN and self.estado == 'JUGANDO':
@@ -134,8 +146,7 @@ class Juego:
             #Siguiente nivel
             if self.nivel_actual < len(Niveles) - 1:
                 self.nivel_actual += 1
-                self.inicializar_juego()
-                self.estado = 'JUGANDO'
+                self.inicializar_juego(mostrar_preparacion = True)
             else:
                 self.estado = 'COMPLETADO'
        
@@ -143,6 +154,8 @@ class Juego:
         #Lo que aparece en pantalla
         if self.estado == 'MENU':
             self.dibujar_menu()
+        elif self.estado == 'Preparando Nivel':
+            self.dibujar_preparando_nivel()
         elif self.estado == 'JUGANDO':
             self.dibujar_juego()
         elif self.estado == 'PAUSA':
@@ -195,6 +208,31 @@ class Juego:
         #Version
         version = self.fuente_muy_pequeña.render("4 Niveles de Aventura", True, (200,200,200))
         self.pantalla.blit(version, (Ventana_ancho//2 - version.get_width()//2, 580))
+    
+    def dibujar_preparando_nivel(self):
+        #Congelamos el nivel
+        self.mundo.dibujar(self.pantalla)
+        self.nivel.dibujar(self.pantalla)
+        self.jugador.dibujar(self.pantalla)
+        
+        #Panel semitransparente
+        overlay = pygame.Surface((Ventana_ancho, Ventana_alto), pygame.SRCALPHA)
+        overlay.fill((0,0,0,180))
+        self.pantalla.blit(overlay, (0,0))
+        
+        texto_preparacion = self.fuente_media.render("Preparate para el", True, Colores['Texto'])
+        texto_nivel = self.fuente_grande.render(f"{self.mensaje_preparacion}", True, Colores['Moneda'])
+        texto_instruccion = self.fuente_pequeña.render("Presiona Enter para comenzar", True, Colores['Texto'])
+        
+        #Posiciones centrales
+        ancho_prep = texto_preparacion.get_width()
+        ancho_nivel = texto_nivel.get_width()
+        ancho_inst = texto_instruccion.get_width()
+        
+        y_centro = Ventana_alto // 2
+        self.pantalla.blit(texto_preparacion, (Ventana_ancho//2 - ancho_prep//2, y_centro - 80))
+        self.pantalla.blit(texto_nivel, (Ventana_ancho//2 - ancho_nivel//2, y_centro - 20))
+        self.pantalla.blit(texto_instruccion, (Ventana_ancho//2 - ancho_inst//2, y_centro + 50))
     
     def dibujar_juego(self):
         #Juego en progreso
