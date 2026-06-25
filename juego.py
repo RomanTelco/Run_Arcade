@@ -7,6 +7,7 @@ Created on Sat Mar 28 15:12:53 2026
 
 import pygame
 import sys
+import math
 from config import *
 from jugador import Jugador
 from mundo import Mundo
@@ -44,6 +45,14 @@ class Juego:
         self.fuente_pequeña = pygame.font.Font(None, 36)
         self.fuente_muy_pequeña = pygame.font.Font(None, 24)
         
+        #Posicion del raton
+        self.mouse_pos = (Ventana_ancho//2, Ventana_alto//2)
+        self.bala_surf_base = pygame.Surface((Balas['Ancho'], Balas['Alto']), pygame.SRCALPHA)
+        self.bala_surf_base.fill(Colores['Bala'])
+        pygame.draw.rect(self.bala_surf_base, (255,255,200), (0,0,Balas['Ancho'],Balas['Alto']),1)
+        pygame.draw.rect(self.bala_surf_base, (255,255,150), (2,1,Balas['Ancho']-4,Balas['Alto']-2),1)
+        
+        
         #Inicializacion del juego
         self.inicializar_juego(mostrar_preparacion = False)
         
@@ -73,6 +82,9 @@ class Juego:
             if evento.type == pygame.QUIT:
                 pygame.quit()
                 sys.exit()
+                
+            if evento.type == pygame.MOUSEMOTION:
+                self.mouse_pos = evento.pos
             
             if evento.type == pygame.KEYDOWN:
                 #Menu del juego
@@ -102,12 +114,21 @@ class Juego:
                     if evento.key == pygame.K_r:
                         self.nivel_actual = 0
                         self.puntuacion_total = 0
+                        self.balas = []
                         self.inicializar_juego(mostrar_preparacion = False)
-            
+                        self.estado = 'JUGANDO'
+                        self.nivel.tiempo_inicio = pygame.time.get_ticks()
+                        
+                        
             #Click para el raton del disparo
             if evento.type == pygame.MOUSEBUTTONDOWN and self.estado == 'JUGANDO':
                 if evento.button == 1:
                     mouse_click = True
+                    
+            if evento.type == pygame.MOUSEBUTTONUP and self.estado == 'JUGANDO':
+                if evento.button == 1:
+                    mouse_click = False
+            
         return mouse_click
     
     def actualizar(self, mouse_click):
@@ -119,7 +140,7 @@ class Juego:
         teclas = pygame.key.get_pressed()
         
         #Actualizacion del jugador y obtancion de nuevas balas
-        nuevas_balas = self.jugador.actualizar(teclas, mouse_click)
+        nuevas_balas = self.jugador.actualizar(teclas, mouse_click, self.mouse_pos)
         self.balas.extend(nuevas_balas)
         
         #Actualizacion dle mundo
@@ -130,8 +151,14 @@ class Juego:
         
         #Actualizacion de las balas
         for bala in self.balas[:]:
-            bala['x'] += bala['velocidad']
-            if bala['x'] < -100 or bala['x'] > Ventana_ancho + 100:
+            if 'velocidad_x' in bala and 'velocidad_y' in bala:
+                bala['x'] += bala['velocidad_x']
+                bala['y'] += bala['velocidad_y']
+            else:
+                bala['x'] += bala.get('velocidad',15)
+            
+            #Eliminamos balas fuera de pantalla
+            if bala['x'] < -100 or bala['x'] > Ventana_ancho + 100 or bala['y'] < -100 or bala['y'] > Ventana_alto + 100:
                 self.balas.remove(bala)
                 
         #Verificacion del estado del jugador : vivo o muerto
@@ -245,7 +272,16 @@ class Juego:
         
         #Balas
         for bala in self.balas:
-            pygame.draw.rect(self.pantalla, bala['color'], (bala['x'], bala['y'], bala['ancho'], bala['alto']))
+            if 'angulo' in bala:             
+                #Rotacion de la bala segun el angulo
+                angulo_grados = -math.degrees(bala['angulo'])
+                bala_rotada = pygame.transform.rotate(self.bala_surf_base, angulo_grados)
+                
+                #Rectangulo centrado
+                rect = bala_rotada.get_rect(center = (bala['x'] + bala['ancho']//2, bala['y'] + bala['alto']//2))
+                self.pantalla.blit(bala_rotada, rect)
+            else:
+                pygame.draw.rect(self.pantalla, bala['color'], (bala['x'], bala['y'], bala['ancho'], bala['alto']))
             
         #Jugador
         self.jugador.dibujar(self.pantalla)

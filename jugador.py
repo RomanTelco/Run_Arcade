@@ -47,33 +47,52 @@ class Jugador:
         self.estado = 'quieto'
         
         #Personaje principal disparo
-        self.disparo = True
-        self.no_disparo = 0
+        self.tiempo_entre_disparo = 0
+        self.velocidad_disparo = 8
+        self.disparando = False
+        
+        #Posicion del raton para apuntar
+        self.mouse_x = x + self.ancho
+        self.mouse_y = y + self.alto//2
+        self.angulo_apuntado = 0
         
         #Colision
         self.rect = pygame.Rect(self.x, self.y, self.ancho, self.alto)
         self.pies_rect = pygame.Rect(self.x + 5, self.y + self.alto - 10, self.ancho - 10, 10)
         
     #En caso de la muerte del personaje principal
-    def actualizar(self, teclas, mouse_click = False):
+    def actualizar(self, teclas, mouse_click = False, mouse_pos = None):
         if self.muerto:
             return []
         
         balas_disparadas = []
         
+        if self.tiempo_entre_disparo > 0:
+            self.tiempo_entre_disparo -= 1
+        
+        #Actualizacion de la posicion del raton para apuntar al enemigo
+        if mouse_pos:
+            self.mouse_x, self.mouse_y = mouse_pos
+            #Angulo entre el jugador y raton
+            dx = self.mouse_x - (self.x + self.ancho//2)
+            dy = self.mouse_y - (self.y + self.alto//2)
+            self.angulo_apuntado = math.atan2(dy,dx)
+            
+            #Direccion de la mira
+            if dx > 0:
+                self.mira_a_derecha = True
+            else:
+                self.mira_a_derecha = False
+        
         #Procesamiento de entrada
         self.procesar_entrada(teclas)
     
         #Disparo con raton
-        if mouse_click and self.disparo and self.balas > 0:
-            bala = self.disparar()
+        if mouse_click and self.tiempo_entre_disparo == 0:
+            bala = self.disparar_apuntando()
             if bala:
                 balas_disparadas.append(bala)
-        
-        if self.no_disparo > 0:
-            self.no_disparo -= 1
-            if self.no_disparo <= 0:
-                self.disparo = True
+
         
         #Se aplica la fisica del personaje pricipal
         self.aplicar_fisica()
@@ -158,28 +177,36 @@ class Jugador:
             self.en_el_suelo = False
             self.salto_doble = False
             self.estado = 'saltando'
-            
-    def disparar(self):
-        if self.balas > 0 and self.disparo:
-            self.balas -= 1
-            self.disparo = False
-            self.no_disparo = 10
-            
-            bala = {
-                'x' : self.x + self.ancho,
-                'y' : self.y + self.alto//2 - Balas['Alto']//2,
-                'ancho' : Balas['Ancho'],
-                'alto' : Balas['Alto'],
-                'velocidad' : Balas['Velocidad'],
-                'color': Colores['Bala']
+    
+    def disparar_apuntando(self):
+        #Control de velocidad del disparo
+        if self.tiempo_entre_disparo > 0:
+            self.tiempo_entre_disparo -= 1
+            return None
+        
+        #Reiniciamos el contador
+        self.tiempo_entre_disparo = self.velocidad_disparo
+        
+        #Direccion de la bala en base al angulo
+        angulo = self.angulo_apuntado
+        velocidad_base = Balas['Velocidad']
+        
+        #Ejes x e y
+        vel_x = math.cos(angulo) * velocidad_base
+        vel_y = math.sin(angulo) * velocidad_base
+        
+        #Bala con direccion
+        bala = {'x':self.x + self.ancho//2 - Balas['Ancho']//2, 
+                'y': self.y + self.alto//2 - Balas['Alto']//2, 
+                'ancho': Balas['Ancho'], 'alto': Balas['Alto'], 
+                'velocidad_x': vel_x, 
+                'velocidad_y': vel_y, 
+                'color': Colores['Bala'], 
+                'angulo': angulo
                 }
-            
-            if not self.mira_a_derecha:
-                bala['x'] = self.x - Balas['Ancho']
-                bala['velocidad'] = -Balas['Velocidad']
-            
-            return bala
-        return None
+        
+        return bala
+    
             
     def actualizar_animacion(self):
         #Actualizar animacion del personaje principal

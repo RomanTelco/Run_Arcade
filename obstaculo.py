@@ -186,7 +186,10 @@ class Obstaculo:
         if not self.activo:
             return 0
         
-        bala_rect = pygame.Rect(bala['x'], bala['y'], bala['ancho'], bala['alto'])
+        if 'angulo' in bala:
+            bala_rect = pygame.Rect(bala['x'], bala['y'], bala['ancho'], bala['alto'])
+        else:
+            bala_rect = pygame.Rect(bala['x'], bala['y'], bala['ancho'], bala['alto'])
         
         #Verificacion del alcance por parte de la bala al enemigo
         if self.rect.colliderect(bala_rect):
