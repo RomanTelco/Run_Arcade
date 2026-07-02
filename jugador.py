@@ -164,11 +164,26 @@ class Jugador:
         self.y += self.velocidad_y
         self.en_el_suelo = False
         
+        #Limites Horizontales
+        if self.x < 0:
+            self.x = 0
+            self.velocidad_x = 0
+        elif self.x > Ventana_ancho - self.ancho:
+            self.x = Ventana_ancho - self.ancho
+            self.velocidad_x = 0
+            
+        #Limite inferior: suelo
         if self.velocidad_y >= 0 and self.y >= Ventana_alto - 150 - self.alto:
             self.y = Ventana_alto - 150 - self.alto
             self.velocidad_y = 0
             self.en_el_suelo = True
             self.salto_doble = False
+            
+        #Limite superior : techo
+        if self.y < 0:
+            self.y = 0
+            self.velocidad_y = 0
+        
     
     def saltar(self):
         if self.en_el_suelo:
@@ -184,8 +199,13 @@ class Jugador:
             self.tiempo_entre_disparo -= 1
             return None
         
+        if self.balas <= 0:
+            return None
+        
         #Reiniciamos el contador
         self.tiempo_entre_disparo = self.velocidad_disparo
+        
+        self.balas -= 1
         
         #Direccion de la bala en base al angulo
         angulo = self.angulo_apuntado
