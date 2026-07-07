@@ -240,10 +240,14 @@ class Obstaculo:
                     if puntos > 0:
                         jugador.puntuacion += puntos
                         return True
+                else:
+                    #Colision con el personaje principal
+                    jugador.recibir_daño()
+                    if jugador.x < self.x:
+                        self.velocidad_x = 3
                     else:
-                        #Colision con el personaje principal
-                        jugador.recibir_daño()
-                        return True
+                        self.velocidad_x = -3
+                    return True
            
             #Volador: Daño permanente
             elif self.tipo =='Volador':

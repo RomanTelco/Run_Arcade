@@ -360,7 +360,7 @@ class Jugador:
             self.tiempo_invencible = Config_Jugador['Tiempo invencible']
             
             #Cuando recibe daño se echa para atras
-            self.velocidad_x = -5
+            self.velocidad_x = -5 if self.mira_a_derecha else 5
             self.velocidad_y = -10
             
             if self.vidas <= 0:
