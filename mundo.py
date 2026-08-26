@@ -21,6 +21,9 @@ class Mundo:
         self.distancia_recorrida = 0
         self.progreso = 0
         
+        #Color de fondo
+        self.color_fondo = self.nivel_config.get('Color_fondo', Colores['Cielo'])
+        
         if nivel_numero == 0:
             self.distancia_total = 4000
         else:
@@ -81,7 +84,7 @@ class Mundo:
     
     def dibujar(self,pantalla):
         #Cielo
-        pantalla.fill(Colores['Cielo'])
+        pantalla.fill(self.color_fondo)
         
         #Nubes
         for nube in self.nubes:

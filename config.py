@@ -104,33 +104,87 @@ Niveles = [
             'Enemigos' : {'Bloque':15, 'Andante':10, 'Volador':0},
             'Monedas':30,
             'Velocidad': -4,
+            'Color_fondo': (135,206,235),
+            'Dificultad': 'Principiante'
         },
         
         {
             #Nivel 1: Facil
-            'Nombre' : 'Nivel 1',
+            'Nombre' : 'Nivel 1 - Pradera',
             'Tiempo_limite' : 180,
             'Enemigos' : {'Bloque':10, 'Andante':15, 'Volador':5},
             'Monedas':40,
             'Velocidad': -5,
+            'Color_fondo': (135,206,235),
+            'Dificultad': 'Principiante'
         },
         
         {
             #Nivel 2: Intermedio
-            'Nombre' : 'Nivel 2',
+            'Nombre' : 'Nivel 2 - Bosque',
             'Tiempo_limite' : 220,
             'Enemigos' : {'Bloque':18, 'Andante':20, 'Volador':12},
             'Monedas':50,
             'Velocidad': -6,
+            'Color_fondo': (100,180,100),
+            'Dificultad': 'Intermedio'
         },
         
         {
             #Nivel 3: Dificil
-            'Nombre' : 'Nivel 3',
+            'Nombre' : 'Nivel 3 - Montaña',
             'Tiempo_limite' : 220,
             'Enemigos' : {'Bloque':30, 'Andante':25, 'Volador':20},
             'Monedas':60,
             'Velocidad': -7,
+            'Color_fondo': (180,180,200),
+            'Dificultad': 'Avanzado'
+        },
+        
+        
+        {
+            #Nivel 4: Muy Dificil
+            'Nombre' : 'Nivel 4 - Volcan',
+            'Tiempo_limite' : 250,
+            'Enemigos' : {'Bloque':25, 'Andante':30, 'Volador':25},
+            'Monedas':70,
+            'Velocidad': -8,
+            'Color_fondo': (80,40,20),
+            'Dificultad': 'Muy Dificl'
+        },
+        
+        {
+            #Nivel 5: Experto
+            'Nombre' : 'Nivel 5 - Hielo',
+            'Tiempo_limite' : 280,
+            'Enemigos' : {'Bloque':20, 'Andante':35, 'Volador':30},
+            'Monedas':80,
+            'Velocidad': -8,
+            'Color_fondo': (200,220,255),
+            'Dificultad': 'Experto'
+        },
+        
+        {
+            #Nivel 6: General
+            'Nombre' : 'Nivel 6 - Castillo Oscuro',
+            'Tiempo_limite' : 300,
+            'Enemigos' : {'Bloque':40, 'Andante':40, 'Volador':35},
+            'Monedas':100,
+            'Velocidad': -9,
+            'Color_fondo': (40,40,60),
+            'Dificultad': 'General'
+        },
+        
+        
+        {
+            #Nivel 7: Leyenda
+            'Nombre' : 'Nivel 7 - Mundo Final',
+            'Tiempo_limite' : 350,
+            'Enemigos' : {'Bloque':50, 'Andante':45, 'Volador':40},
+            'Monedas':150,
+            'Velocidad': -10,
+            'Color_fondo': (20,20,40),
+            'Dificultad': 'Leyenda'
         }
     ]
 
