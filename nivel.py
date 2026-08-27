@@ -24,6 +24,8 @@ class Nivel:
         self.tiempo_limite = self.config['Tiempo_limite']
         self.tiempo_restante = self.tiempo_limite
         
+        self.mundo.iniciar_cronometro()
+        
         #Elementos que se encuentran en el nivel
         self.obstaculos = []
         self.monedas = []

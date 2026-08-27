@@ -100,8 +100,8 @@ Niveles = [
         {   
             #Tutorial
             'Nombre' : 'Tutorial',
-            'Tiempo_limite' : 50,
-            'Enemigos' : {'Bloque':15, 'Andante':10, 'Volador':0},
+            'Tiempo_limite' : 40,
+            'Enemigos' : {'Bloque':30, 'Andante':35, 'Volador':10},
             'Monedas':30,
             'Velocidad': -4,
             'Color_fondo': (135,206,235),
@@ -111,8 +111,8 @@ Niveles = [
         {
             #Nivel 1: Facil
             'Nombre' : 'Nivel 1 - Pradera',
-            'Tiempo_limite' : 180,
-            'Enemigos' : {'Bloque':10, 'Andante':15, 'Volador':5},
+            'Tiempo_limite' : 60,
+            'Enemigos' : {'Bloque':50, 'Andante':55, 'Volador':25},
             'Monedas':40,
             'Velocidad': -5,
             'Color_fondo': (135,206,235),
@@ -122,8 +122,8 @@ Niveles = [
         {
             #Nivel 2: Intermedio
             'Nombre' : 'Nivel 2 - Bosque',
-            'Tiempo_limite' : 220,
-            'Enemigos' : {'Bloque':18, 'Andante':20, 'Volador':12},
+            'Tiempo_limite' : 80,
+            'Enemigos' : {'Bloque':70, 'Andante':70, 'Volador':34},
             'Monedas':50,
             'Velocidad': -6,
             'Color_fondo': (100,180,100),
@@ -133,8 +133,8 @@ Niveles = [
         {
             #Nivel 3: Dificil
             'Nombre' : 'Nivel 3 - Montaña',
-            'Tiempo_limite' : 220,
-            'Enemigos' : {'Bloque':30, 'Andante':25, 'Volador':20},
+            'Tiempo_limite' : 100,
+            'Enemigos' : {'Bloque':100, 'Andante':85, 'Volador':50},
             'Monedas':60,
             'Velocidad': -7,
             'Color_fondo': (180,180,200),
@@ -145,8 +145,8 @@ Niveles = [
         {
             #Nivel 4: Muy Dificil
             'Nombre' : 'Nivel 4 - Volcan',
-            'Tiempo_limite' : 250,
-            'Enemigos' : {'Bloque':25, 'Andante':30, 'Volador':25},
+            'Tiempo_limite' : 120,
+            'Enemigos' : {'Bloque':130, 'Andante':80, 'Volador':75},
             'Monedas':70,
             'Velocidad': -8,
             'Color_fondo': (80,40,20),
@@ -156,8 +156,8 @@ Niveles = [
         {
             #Nivel 5: Experto
             'Nombre' : 'Nivel 5 - Hielo',
-            'Tiempo_limite' : 280,
-            'Enemigos' : {'Bloque':20, 'Andante':35, 'Volador':30},
+            'Tiempo_limite' : 140,
+            'Enemigos' : {'Bloque':120, 'Andante':90, 'Volador':80},
             'Monedas':80,
             'Velocidad': -8,
             'Color_fondo': (200,220,255),
@@ -167,8 +167,8 @@ Niveles = [
         {
             #Nivel 6: General
             'Nombre' : 'Nivel 6 - Castillo Oscuro',
-            'Tiempo_limite' : 300,
-            'Enemigos' : {'Bloque':40, 'Andante':40, 'Volador':35},
+            'Tiempo_limite' : 160,
+            'Enemigos' : {'Bloque':120, 'Andante':90, 'Volador':85},
             'Monedas':100,
             'Velocidad': -9,
             'Color_fondo': (40,40,60),
@@ -179,8 +179,8 @@ Niveles = [
         {
             #Nivel 7: Leyenda
             'Nombre' : 'Nivel 7 - Mundo Final',
-            'Tiempo_limite' : 350,
-            'Enemigos' : {'Bloque':50, 'Andante':45, 'Volador':40},
+            'Tiempo_limite' : 180,
+            'Enemigos' : {'Bloque':130, 'Andante':100, 'Volador':100},
             'Monedas':150,
             'Velocidad': -10,
             'Color_fondo': (20,20,40),

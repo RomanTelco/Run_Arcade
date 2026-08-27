@@ -35,6 +35,7 @@ class Jugador:
         self.balas = Config_Jugador['Balas']
         self.puntuacion = 0
         self.monedas = 0
+        self.monedas_para_bala = 0
         self.invencible = False
         self.tiempo_invencible = 0
         self.muerto = False
@@ -377,6 +378,14 @@ class Jugador:
         #Monedas que consigue personaje pricipal
         self.monedas += 1
         self.puntuacion += 50
+        self.monedas_para_bala += 1
+        
+        #5 monedas = 1 bala
+        if self.monedas % 5 == 0:
+            self.monedas_para_bala = 0
+            self.balas = min(self.balas + 1, Balas['Maximo_Balas'])
+            print(f"Bala extra!! Balas totales : {self.balas}")
+        
         #100 monedas = 1 vida
         if self.monedas % 100 == 0:
             self.vidas = min(self.vidas + 1, 5)

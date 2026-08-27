@@ -24,6 +24,9 @@ class Mundo:
         #Color de fondo
         self.color_fondo = self.nivel_config.get('Color_fondo', Colores['Cielo'])
         
+        self.tiempo_inicio = pygame.time.get_ticks()
+        self.tiempo_limite = self.nivel_config['Tiempo_limite']
+        
         if nivel_numero == 0:
             self.distancia_total = 4000
         else:
@@ -37,7 +40,11 @@ class Mundo:
         #Generacion de elementos iniciales
         self.generar_nubes()
         self.generar_decoraciones()
-        
+    
+    
+    def iniciar_cronometro(self):
+        self.tiempo_inicio = pygame.time.get_ticks()
+    
     def generar_nubes(self):
         for i in range(8):
             x = random.randint(0, Ventana_ancho*2)
@@ -64,7 +71,11 @@ class Mundo:
         
         #Distancia recorrida
         self.distancia_recorrida += abs(self.velocidad)
-        self.progreso = min(100, (self.distancia_recorrida / self.distancia_total)*100)
+        
+        tiempo_actual = pygame.time.get_ticks()
+        tiempo_transcurrido = (tiempo_actual - self.tiempo_inicio) / 1000
+        
+        self.progreso = min(100, (tiempo_transcurrido / self.tiempo_limite)*100)
         
         #Movimiento de las nubes
         for nube in self.nubes:

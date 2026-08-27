@@ -73,7 +73,11 @@ class Juego:
         if mostrar_preparacion:
             self.mensaje_preparacion = Niveles[self.nivel_actual]['Nombre']
             self.estado = 'Preparando Nivel'
-        
+    
+    def reiniciar_cronometro_mundo(self):
+        if self.mundo:
+            self.mundo.iniciar_cronometro()
+    
     def manejar_eventos(self):
         #Eventos del juego
         mouse_click = False
