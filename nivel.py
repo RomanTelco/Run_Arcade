@@ -115,7 +115,14 @@ class Nivel:
         for i in range(self.config['Monedas']):
             x=random.randint(200, 5000)
             y=random.randint(150, 500)
-            self.monedas.append({'x':x, 'y':y, 'radio': 12, 'animacion': 0, 'recolectada': False})
+            self.monedas.append({'x':x, 'y':y, 'radio': 12, 'animacion': 0, 'recolectada': False, 'tipo': 'normal'})
+            
+        #Moneda de invencibilidad
+        cantidad_especiales = max(3, self.config['Monedas'] // 10)
+        for i in range(cantidad_especiales):
+            x=random.randint(400, 5000)
+            y=random.randint(150, 450)
+            self.monedas.append({'x':x, 'y':y, 'radio': 15, 'animacion': 0, 'recolectada': False, 'tipo': 'invencible'})
     
     def actualizar(self, jugador, balas):
         #Actualizamos el nivel
@@ -175,7 +182,12 @@ class Nivel:
             
             if moneda_rect.colliderect(jugador.rect):
                 moneda['recolectada'] = True
-                jugador.recolectar_moneda()
+                if moneda.get('tipo') == 'invencible':
+                    jugador.activar_invencibilidad_moneda()
+                    jugador.puntuacion += 100
+                    print("Invencible")
+                else:
+                    jugador.recolectar_moneda()
         
         
         #Generar nuevas monedas
@@ -184,7 +196,8 @@ class Nivel:
             for i in range(nuevas_monedas):
                 x=self.mundo.distancia_recorrida + random.randint(400, 1000)
                 y= random.randint(150, 500)
-                self.monedas.append({'x':x, 'y':y, 'radio':12, 'animacion':0, 'recolectada': False})
+                tipo = 'invencible' if random.random() < 0.08 else 'normal'
+                self.monedas.append({'x':x, 'y':y, 'radio':12, 'animacion':0, 'recolectada': False, 'tipo': tipo})
         
         #Nivel completado?
         if self.mundo.progreso >= 100:
@@ -205,14 +218,25 @@ class Nivel:
             if not moneda['recolectada']:
                 #Flotante
                 y_offset = math.sin(moneda['animacion']) * 5
+                x = int(moneda['x'])
+                y = int(moneda['y'] + y_offset)
                 
-                #Moneda exterior
-                pygame.draw.circle(pantalla, Colores['Moneda'], (int(moneda['x']),int(moneda['y'] + y_offset)), moneda['radio'])
+                if moneda.get('tipo') == 'invencible':
+                    pulso = int(3+ math.sin(moneda['animacion']*2)*2)
+                    pygame.draw.circle(pantalla,(0,100,200),(x,y),moneda['radio'] + pulso)
+                    pygame.draw.circle(pantalla,Colores['Moneda_invencible'], (x,y),moneda['radio'])
+                    pygame.draw.circle(pantalla,Colores['Moneda_invencible_brillo'],(x,y), moneda['radio'] - 4)
                 
-                #Moneda interior
-                pygame.draw.circle(pantalla, (255,230,0), (int(moneda['x']), int(moneda['y'] + y_offset)), moneda['radio']-4)
-                #Centro de la moneda
-                pygame.draw.circle(pantalla, (255,200,0), (int(moneda['x']), int(moneda['y'] + y_offset)), moneda['radio']-8)
+                    #Simbolo central de la moneda
+                    pygame.draw.circle(pantalla, (255,255,255), (x,y), 4)
+                else:    
+                    #Moneda exterior
+                    pygame.draw.circle(pantalla, Colores['Moneda'], (int(moneda['x']),int(moneda['y'] + y_offset)), moneda['radio'])
+                    
+                    #Moneda interior
+                    pygame.draw.circle(pantalla, (255,230,0), (int(moneda['x']), int(moneda['y'] + y_offset)), moneda['radio']-4)
+                    #Centro de la moneda
+                    pygame.draw.circle(pantalla, (255,200,0), (int(moneda['x']), int(moneda['y'] + y_offset)), moneda['radio']-8)
                 
         #Obstaculos
         for obstaculo in self.obstaculos:

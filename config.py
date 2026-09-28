@@ -41,6 +41,10 @@ Colores = {
     'Texto' : (255,255,255),
     'Texto_sombra' : (0,0,0),
     'Barra_vida' : (0,255,0),
+    
+    #Moneda invencible
+    'Moneda_invencible': (0,200,255),
+    'Moneda_invencible_brillo': (200,255,255),
     }
 
 #Fisica del juego
@@ -58,6 +62,7 @@ Config_Jugador = {
     'Vidas' : 3,
     'Balas' : 20,
     'Tiempo invencible' : 60,
+    'Tiempo moneda': 600,
     }
 
 #Parametros de los enemigos

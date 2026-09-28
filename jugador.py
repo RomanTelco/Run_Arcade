@@ -249,10 +249,21 @@ class Jugador:
         color_sombra = (180,0,0)            #Rojo oscuro
         color_luz = (255,80,80)             #Rojo claro         
         
-        if self.invencible and self.tiempo_invencible % 10 < 5:
-            color_cuerpo = (255,255,255)
-            color_sombra = (200,200,200)
-            color_luz = (255,255,255)
+        if self.invencible:
+            if self.tiempo_invencible > Config_Jugador['Tiempo invencible']:
+                if self.invencible and self.tiempo_invencible % 10 < 5:
+                    color_cuerpo = (0,200,255)
+                    color_sombra = (0,120,180)
+                    color_luz = (150,240,255)
+                else:
+                    color_cuerpo = (100,220,255)
+                    color_sombra = (0,150,200)
+                    color_luz = (200,250,255)
+            else:
+                if self.invencible and self.tiempo_invencible % 10 < 5:
+                    color_cuerpo = (255,255,255)
+                    color_sombra = (200,200,200)
+                    color_luz = (255,255,255)
             
         #Cuerpo del personaje principal
         sombra_rect = pygame.Rect(self.x + 5, self.y + 5, self.ancho, self.alto)
@@ -393,4 +404,8 @@ class Jugador:
     def recargar_balas(self, cantidad):
         #Recarga de balas del personaje principal
         self.balas = min(self.balas + cantidad, Balas['Maximo_Balas'])
+        
+    def activar_invencibilidad_moneda(self):
+        self.invencible = True
+        self.tiempo_invencible = Config_Jugador['Tiempo moneda']
         
