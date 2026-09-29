@@ -180,6 +180,9 @@ class Juego:
                 self.inicializar_juego(mostrar_preparacion = True)
             else:
                 self.estado = 'COMPLETADO'
+        elif self.jugador.muerto:
+            self.estado = 'GAME OVER'
+            self.puntuacion_total += self.jugador.puntuacion
        
     def dibujar(self):
         #Lo que aparece en pantalla

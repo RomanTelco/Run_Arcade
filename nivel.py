@@ -206,7 +206,7 @@ class Nivel:
             print(f"\n Nivel Completado! Puntuacion: {jugador.puntuacion}")
         
         #Tiempo terminado?
-        if self.tiempo_restante <= 0:
+        elif self.tiempo_restante <= 0:
             jugador.morir()
             print("\n Tiempo Agotado!")
     

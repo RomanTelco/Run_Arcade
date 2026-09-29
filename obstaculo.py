@@ -215,7 +215,19 @@ class Obstaculo:
         
         if self.rect.colliderect(jugador.rect):
             #Comportamientos de los obstaculos
+            if jugador.invencible_por_moneda:
+                #El bloque es invencible
+                if self.tipo == 'Bloque':
+                    return True
+                #Muerte de los enemigos
+                self.vida = 0
+                self.activo = False
+                jugador.puntuacion += self.puntos
+                return True
             
+            elif jugador.invencible:
+                return True
+                
             #Bloque: salto por encima
             if self.tipo == 'Bloque':
                 if(jugador.velocidad_y > 0 and jugador.pies_rect.colliderect(pygame.Rect(self.x,self.y,self.ancho,10))):

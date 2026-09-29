@@ -61,6 +61,9 @@ class Jugador:
         self.rect = pygame.Rect(self.x, self.y, self.ancho, self.alto)
         self.pies_rect = pygame.Rect(self.x + 5, self.y + self.alto - 10, self.ancho - 10, 10)
         
+        #Muerte de los enemigos por parte de la moneda invencible
+        self.invencible_por_moneda = False
+        
     #En caso de la muerte del personaje principal
     def actualizar(self, teclas, mouse_click = False, mouse_pos = None):
         if self.muerto:
@@ -242,6 +245,7 @@ class Jugador:
             self.tiempo_invencible -= 1
             if self.tiempo_invencible <= 0:
                 self.invencible = False
+                self.invencible_por_moneda = False
     
     def dibujar(self,pantalla):
         #Dibujamos al personaje principal
@@ -369,6 +373,7 @@ class Jugador:
         if not self.invencible:
             self.vidas -= 1
             self.invencible = True
+            self.invencible_por_moneda = False
             self.tiempo_invencible = Config_Jugador['Tiempo invencible']
             
             #Cuando recibe daño se echa para atras
@@ -407,5 +412,7 @@ class Jugador:
         
     def activar_invencibilidad_moneda(self):
         self.invencible = True
+        self.invencible_por_moneda = True
         self.tiempo_invencible = Config_Jugador['Tiempo moneda']
+       
         
