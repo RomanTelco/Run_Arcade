@@ -29,6 +29,7 @@ class Jugador:
         self.en_el_suelo = False
         self.salto = False
         self.salto_doble = False
+        self.salto_triple = False
         
         #Estados del personaje pricipal
         self.vidas = Config_Jugador['Vidas']
@@ -151,6 +152,12 @@ class Jugador:
                 self.velocidad_y = Fuerza_Salto * 0.8
                 self.saltando = True
                 self.estado = 'saltando'
+            elif not self.en_el_suelo and not self.salto_triple and self.saltando:
+                self.salto_triple = True
+                self.velocidad_y = Fuerza_Salto * 0.8
+                self.saltando = True
+                self.estado = 'saltando'
+                
         self.ultimo_salto = salto_actual
      
         
@@ -182,6 +189,7 @@ class Jugador:
             self.velocidad_y = 0
             self.en_el_suelo = True
             self.salto_doble = False
+            self.salto_triple = False
             
         #Limite superior : techo
         if self.y < 0:

@@ -10,6 +10,7 @@ Created on Mon Feb  2 19:18:53 2026
 Ventana_ancho = 1200
 Ventana_alto = 700
 FPS = 60
+Pantalla_completa = True
 
 #Paleta de Colores para los objetos
 Colores = {
