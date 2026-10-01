@@ -40,6 +40,14 @@ class Mundo:
         #Generacion de elementos iniciales
         self.generar_nubes()
         self.generar_decoraciones()
+        
+        #Lluvia en el nivel 2
+        self.lluvia = (nivel_numero == 2)
+        self.gotas = []
+        if self.lluvia:
+            self.generar_lluvia()
+            self.capa_lluvia = pygame.Surface((Ventana_ancho, Ventana_alto), pygame.SRCALPHA)
+            self.capa_lluvia.fill((0,0,40,60))
     
     
     def iniciar_cronometro(self):
@@ -92,6 +100,10 @@ class Mundo:
                 decoracion['x'] = Ventana_ancho + 500
                 if decoracion['tipo'] == 'arbusto':
                     decoracion['tamaño'] = random.randint(20, 40)
+        
+        #Lluvia
+        if self.lluvia:
+            self.actualizar_lluvia()
     
     def dibujar(self,pantalla):
         #Cielo
@@ -133,7 +145,31 @@ class Mundo:
                 pygame.draw.circle(pantalla,decoracion['color'], (centro_x + radio*0.7, centro_y - radio*0.5), radio*0.8)
                 pygame.draw.circle(pantalla,decoracion['color'], (centro_x - radio*0.7, centro_y - radio*0.5), radio*0.8)
                 
+        #LLuvia
+        if self.lluvia:
+            self.dibujar_lluvia(pantalla)
                 
+    def generar_lluvia(self):
+        for i in range(150):
+            self.gotas.append({'x': random.randint(0, Ventana_ancho + 200),'y': random.randint(-Ventana_alto, Ventana_alto), 'largo': random.randint(10, 20), 'velocidad_y': random.randint(12, 20), 'velocidad_x': random.uniform(-3, -1.5)})
+    
+    def actualizar_lluvia(self):
+        for gota in self.gotas:
+            gota['y'] += gota['velocidad_y']
+            gota['x'] += gota['velocidad_x']
+            #Para que aparezcan de nuevo
+            if gota['y'] > self.suelo_y + random.randint(0, 120) or gota['x'] < -20:
+                gota['x'] = random.randint(0, Ventana_ancho + 200)
+                gota['y'] = random.randint(-100, 0)
+    
+    def dibujar_lluvia(self, pantalla):
+        pantalla.blit(self.capa_lluvia, (0,0))
+        for gota in self.gotas:
+            x, y = int(gota['x']), int(gota['y'])
+            cola_x = int(x - gota['velocidad_x'] *2)
+            cola_y = y - gota['largo']
+            pygame.draw.line(pantalla, (170,200,255), (cola_x, cola_y), (x,y), 1)
+            
                 
                 
                 
