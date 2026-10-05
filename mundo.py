@@ -48,6 +48,12 @@ class Mundo:
             self.generar_lluvia()
             self.capa_lluvia = pygame.Surface((Ventana_ancho, Ventana_alto), pygame.SRCALPHA)
             self.capa_lluvia.fill((0,0,40,60))
+            
+        #Nieve en el nivel 5
+        self.nieve = (nivel_numero == 5)
+        self.copos = []
+        if self.nieve:
+            self.generar_nieve()
     
     
     def iniciar_cronometro(self):
@@ -104,6 +110,11 @@ class Mundo:
         #Lluvia
         if self.lluvia:
             self.actualizar_lluvia()
+        
+        #Nieve
+        if self.nieve:
+            self.actualizar_nieve()
+            
     
     def dibujar(self,pantalla):
         #Cielo
@@ -148,10 +159,21 @@ class Mundo:
         #LLuvia
         if self.lluvia:
             self.dibujar_lluvia(pantalla)
+        
+        #Nieve
+        if self.nieve:
+            self.dibujar_nieve(pantalla)
+            
+            
+        
                 
     def generar_lluvia(self):
         for i in range(150):
             self.gotas.append({'x': random.randint(0, Ventana_ancho + 200),'y': random.randint(-Ventana_alto, Ventana_alto), 'largo': random.randint(10, 20), 'velocidad_y': random.randint(12, 20), 'velocidad_x': random.uniform(-3, -1.5)})
+            
+    def generar_nieve(self):
+        for i in range(120):
+            self.copos.append({'x': random.randint(0, Ventana_ancho + 200),'y': random.randint(-Ventana_alto, Ventana_alto), 'radio': random.randint(2, 4), 'velocidad_y': random.uniform(1.5, 3.5), 'velocidad_x': random.uniform(-2, -0.5), 'fase': random.uniform(0, math.pi * 2)})
     
     def actualizar_lluvia(self):
         for gota in self.gotas:
@@ -162,6 +184,16 @@ class Mundo:
                 gota['x'] = random.randint(0, Ventana_ancho + 200)
                 gota['y'] = random.randint(-100, 0)
     
+    def actualizar_nieve(self):
+        for copo in self.copos:
+            copo['fase'] += 0.05
+            copo['y'] += copo['velocidad_y']
+            copo['x'] += copo['velocidad_x'] + math.sin(copo['fase']) * 0.8
+            #Para que aparezcan de nuevo
+            if copo['y'] > self.suelo_y + random.randint(0, 100) or copo['x'] < -20:
+                copo['x'] = random.randint(0, Ventana_ancho + 200)
+                copo['y'] = random.randint(-100, 0)
+    
     def dibujar_lluvia(self, pantalla):
         pantalla.blit(self.capa_lluvia, (0,0))
         for gota in self.gotas:
@@ -169,6 +201,11 @@ class Mundo:
             cola_x = int(x - gota['velocidad_x'] *2)
             cola_y = y - gota['largo']
             pygame.draw.line(pantalla, (170,200,255), (cola_x, cola_y), (x,y), 1)
+            
+    def dibujar_nieve(self, pantalla):
+        for copo in self.copos:
+            pygame.draw.circle(pantalla, (255,255,255), (int(copo['x']),int(copo['y'])), copo['radio'])
+            
             
                 
                 
