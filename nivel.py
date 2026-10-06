@@ -113,14 +113,14 @@ class Nivel:
     def generar_monedas(self):
         #Generamos monedas a utilizar en el juego
         for i in range(self.config['Monedas']):
-            x=random.randint(200, 5000)
+            x=Ventana_ancho + random.randint(50, 6000)
             y=random.randint(150, 500)
             self.monedas.append({'x':x, 'y':y, 'radio': 12, 'animacion': 0, 'recolectada': False, 'tipo': 'normal'})
             
         #Moneda de invencibilidad
         cantidad_especiales = max(3, self.config['Monedas'] // 10)
         for i in range(cantidad_especiales):
-            x=random.randint(400, 5000)
+            x=Ventana_ancho + random.randint(200, 6000)
             y=random.randint(150, 450)
             self.monedas.append({'x':x, 'y':y, 'radio': 15, 'animacion': 0, 'recolectada': False, 'tipo': 'invencible'})
     
@@ -177,6 +177,11 @@ class Nivel:
             moneda['x'] += self.mundo.velocidad
             moneda['animacion'] = (moneda['animacion'] + 0.2) % (3.14 * 2)
             
+            #Las monedas se eliminan cuando salen de la pantalla
+            if moneda['x'] < -50:
+                self.monedas.remove(moneda)
+                continue
+            
             #Verificamos la recoleccion por parte del jugador
             moneda_rect = pygame.Rect(moneda['x'] - moneda['radio'], moneda['y'] - moneda['radio'], moneda['radio'] * 2, moneda['radio'] * 2)
             
@@ -194,10 +199,11 @@ class Nivel:
         if len(self.monedas) < 20:
             nuevas_monedas = random.randint(3, 8)
             for i in range(nuevas_monedas):
-                x=self.mundo.distancia_recorrida + random.randint(400, 1000)
+                x=Ventana_ancho + random.randint(50, 800)
                 y= random.randint(150, 500)
                 tipo = 'invencible' if random.random() < 0.08 else 'normal'
-                self.monedas.append({'x':x, 'y':y, 'radio':12, 'animacion':0, 'recolectada': False, 'tipo': tipo})
+                radio = 15 if tipo == 'invencible' else 12
+                self.monedas.append({'x':x, 'y':y, 'radio': radio, 'animacion':0, 'recolectada': False, 'tipo': tipo})
         
         #Nivel completado?
         if self.mundo.progreso >= 100:

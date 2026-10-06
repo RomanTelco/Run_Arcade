@@ -20,7 +20,9 @@ class Juego:
         pygame.font.init()
         
         #Ventana principal del juego
-        self.pantalla = pygame.display.set_mode((Ventana_ancho, Ventana_alto))
+        self.pantalla_real = pygame.display.set_mode((0,0), pygame.FULLSCREEN)
+        self.ancho_real, self.alto_real = self.pantalla_real.get_size()
+        self.pantalla = pygame.Surface((Ventana_ancho, Ventana_alto))
         pygame.display.set_caption("Run Arcade")
         
         #FPS del juego
@@ -88,7 +90,7 @@ class Juego:
                 sys.exit()
                 
             if evento.type == pygame.MOUSEMOTION:
-                self.mouse_pos = evento.pos
+                self.mouse_pos = self.convertir_coordenadas_raton(evento.pos)
             
             if evento.type == pygame.KEYDOWN:
                 #Menu del juego
@@ -127,6 +129,7 @@ class Juego:
             #Click para el raton del disparo
             if evento.type == pygame.MOUSEBUTTONDOWN and self.estado == 'JUGANDO':
                 if evento.button == 1:
+                    self.mouse_pos = self.convertir_coordenadas_raton(evento.pos)
                     mouse_click = True
                     
             if evento.type == pygame.MOUSEBUTTONUP and self.estado == 'JUGANDO':
@@ -202,7 +205,7 @@ class Juego:
             self.dibujar_juego()
             self.dibujar_completado()
         
-        pygame.display.flip()
+        self.presentar()
         
     def dibujar_menu(self):
         #Pantalla del menu principal
@@ -399,7 +402,45 @@ class Juego:
             self.dibujar()
             self.reloj.tick(FPS)
             
+    def presentar(self):
+        ratio_objetivo = Ventana_ancho / Ventana_alto
+        ratio_pantalla = self.ancho_real / self.alto_real
         
+        if ratio_pantalla > ratio_objetivo:
+            alto_dest = self.alto_real
+            ancho_dest = int(alto_dest * ratio_objetivo)
+        else:
+            ancho_dest = self.ancho_real
+            alto_dest = int(ancho_dest / ratio_objetivo)
+        
+        #Escalamos
+        escalada = pygame.transform.smoothscale(self.pantalla, (ancho_dest, alto_dest))
+        
+        #Centramos el fondo
+        self.pantalla_real.fill((0,0,0))
+        x = (self.ancho_real - ancho_dest) // 2
+        y = (self.alto_real - alto_dest) // 2
+        self.pantalla_real.blit(escalada, (x,y))
                     
-                
+        pygame.display.flip()
+        
+    def convertir_coordenadas_raton(self, pos_real):
+        ratio_objetivo = Ventana_ancho / Ventana_alto
+        ratio_pantalla = self.ancho_real / self.alto_real
+        
+        if ratio_pantalla > ratio_objetivo:
+            alto_dest = self.alto_real
+            ancho_dest = int(alto_dest * ratio_objetivo)
+        else:
+            ancho_dest = self.ancho_real
+            alto_dest = int(ancho_dest / ratio_objetivo)
+            
+        offset_x = (self.ancho_real - ancho_dest) // 2
+        offset_y = (self.alto_real - alto_dest) // 2
+        
+        x = (pos_real[0] - offset_x) * Ventana_ancho / ancho_dest
+        y = (pos_real[1] - offset_y) * Ventana_alto / alto_dest
+        
+        return (x,y)
+        
                 
