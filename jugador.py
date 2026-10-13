@@ -7,7 +7,48 @@ Created on Wed Feb  4 19:17:48 2026
 
 import pygame
 import math
+import array
 from config import *
+
+#Bip del salto del jugador principal
+def crear_bip(frecuencia = 880, duracion = 0.08, volumen = 0.3):
+    config_audio = pygame.mixer.get_init()
+    if not config_audio:
+        return None
+    
+    frecuencia_muestreo, formato, canales = config_audio
+    total_muestras = int(frecuencia_muestreo * duracion)
+    muestras = array.array('h')
+    
+    for i in range(total_muestras):
+        #El volumen baja 
+        envolvente = 1 - (i/total_muestras)
+        valor = int(32767 * volumen * envolvente * math.sin(2*math.pi * frecuencia * i /frecuencia_muestreo))
+        for _ in range(canales):
+            muestras.append(valor)
+            
+    return pygame.mixer.Sound(buffer = muestras.tobytes())
+
+#Sonido del disparo
+def crear_disparo(frecuencia_inicial = 1400, frecuencia_final = 250, duracion = 0.12, volumen = 0.25):
+    config_audio = pygame.mixer.get_init()
+    if not config_audio:
+        return None
+    
+    frecuencia_muestreo, formato, canales = config_audio
+    total_muestras = int(frecuencia_muestreo * duracion)
+    muestras = array.array('h')
+    fase = 0
+    
+    for i in range(total_muestras):
+        progreso = i/total_muestras
+        frecuencia = frecuencia_inicial + (frecuencia_final - frecuencia_inicial) * progreso
+        fase += 2*math.pi*frecuencia/frecuencia_muestreo
+        envolvente = (1-progreso)**2
+        valor = int(32767 * volumen * envolvente * math.sin(fase))
+        for _ in range(canales):
+            muestras.append(valor)
+    return pygame.mixer.Sound(buffer = muestras.tobytes())
 
 #Fichero del jugador principal
 class Jugador:
@@ -30,6 +71,8 @@ class Jugador:
         self.salto = False
         self.salto_doble = False
         self.salto_triple = False
+        self.sonido_salto = None
+        self.sonido_disparo = None
         
         #Estados del personaje pricipal
         self.vidas = Config_Jugador['Vidas']
@@ -147,16 +190,19 @@ class Jugador:
                 self.saltando = True
                 self.salto_doble = False
                 self.estado = 'saltando'
+                self.reproducir_salto()
             elif not self.en_el_suelo and not self.salto_doble and self.saltando:
                 self.salto_doble = True
                 self.velocidad_y = Fuerza_Salto * 0.8
                 self.saltando = True
                 self.estado = 'saltando'
+                self.reproducir_salto()
             elif not self.en_el_suelo and not self.salto_triple and self.saltando:
                 self.salto_triple = True
                 self.velocidad_y = Fuerza_Salto * 0.8
                 self.saltando = True
                 self.estado = 'saltando'
+                self.reproducir_salto()
                 
         self.ultimo_salto = salto_actual
      
@@ -218,6 +264,7 @@ class Jugador:
         self.tiempo_entre_disparo = self.velocidad_disparo
         
         self.balas -= 1
+        self.reproducir_disparo()
         
         #Direccion de la bala en base al angulo
         angulo = self.angulo_apuntado
@@ -422,5 +469,21 @@ class Jugador:
         self.invencible = True
         self.invencible_por_moneda = True
         self.tiempo_invencible = Config_Jugador['Tiempo moneda']
-       
+    
+    def reproducir_salto(self):
+        try:
+            if self.sonido_salto is None:
+                self.sonido_salto = crear_bip()
+            if self.sonido_salto:
+                self.sonido_salto.play()
+        except pygame.error:
+            pass
+    def reproducir_disparo(self):
+        try:
+            if self.sonido_disparo is None:
+                self.sonido_disparo = crear_disparo()
+            if self.sonido_disparo:
+                self.sonido_disparo.play()
+        except pygame.error:
+            pass
         
