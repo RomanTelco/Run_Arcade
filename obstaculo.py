@@ -8,10 +8,38 @@ Created on Wed Feb 18 19:52:42 2026
 import pygame
 import random
 import math
+import array
 from config import *
+
+def crear_destruccion(duracion = 0.3, volumen = 0.35):
+    config_audio = pygame.mixer.get_init()
+    if not config_audio:
+        return None
+    
+    frecuencia_muestreo, formato, canales = config_audio
+    total_muestras = int(frecuencia_muestreo * duracion)
+    muestras = array.array('h')
+    anterior = 0
+    fase = 0
+    
+    for i in range(total_muestras):
+        progreso = i/total_muestras
+        anterior = anterior*0.6+random.uniform(-1,1) * 0.4
+        frecuencia = 200-160*progreso
+        fase += 2 * math.pi * frecuencia / frecuencia_muestreo
+        mezcla = anterior * 0.7 + math.sin(fase) * 0.5
+        envolvente = (1-progreso)**2
+        valor = int(32767 * volumen * envolvente * mezcla)
+        for _ in range(canales):
+            muestras.append(valor)
+            
+    return pygame.mixer.Sound(buffer = muestras.tobytes())
 
 #Fichero con las clases de los obstaculos
 class Obstaculo:
+    fuente_vida = None
+    sonido_destruccion = None
+    
     def __init__(self, tipo, x, y, nivel = 1):
         self.tipo = tipo
         self.nivel = nivel
@@ -201,6 +229,7 @@ class Obstaculo:
             
             if self.vida <= 0:
                 self.activo = False
+                self.reproducir_destruccion()
                 return self.puntos
             else:
                 return self.puntos // 2
@@ -222,6 +251,7 @@ class Obstaculo:
                 #Muerte de los enemigos
                 self.vida = 0
                 self.activo = False
+                self.reproducir_destruccion()
                 jugador.puntuacion += self.puntos
                 return True
             
@@ -275,6 +305,7 @@ class Obstaculo:
             self.daño_tiempo = 20
             if self.vida <= 0:
                 self.activo = False
+                self.reproducir_destruccion()
                 return self.puntos
             else:
                 #Rebote 
@@ -282,6 +313,18 @@ class Obstaculo:
                 return self.puntos // 2
         return 0
             
+    def reproducir_destruccion(self):
+        #Sonido al morir el enemigo
+        if self.tipo != 'Andante':
+            return
+        try:
+            if Obstaculo.sonido_destruccion is None:
+                Obstaculo.sonido_destruccion = crear_destruccion()
+            if Obstaculo.sonido_destruccion:
+                Obstaculo.sonido_destruccion.play()
+        
+        except pygame.error:
+            pass
         
            
         
