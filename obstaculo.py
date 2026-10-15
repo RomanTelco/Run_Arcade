@@ -35,10 +35,53 @@ def crear_destruccion(duracion = 0.3, volumen = 0.35):
             
     return pygame.mixer.Sound(buffer = muestras.tobytes())
 
+def crear_explosion_nave(duracion = 0.7, volumen = 0.35):
+    config_audio = pygame.mixer.get_init()
+    if not config_audio:
+        return None
+    
+    frecuencia_muestreo, formato, canales = config_audio
+    total_muestras = int(frecuencia_muestreo * duracion)
+    muestras = array.array('h')
+    anterior = 0
+    fase_zap = 0
+    fase_grave = 0
+    duracion_zap = 0.18
+    
+    for i in range(total_muestras):
+        t = i/frecuencia_muestreo
+        progreso = i / total_muestras
+        
+        #Sonido grave
+        zap = 0
+        if t < duracion_zap:
+            p_zap = t /duracion_zap
+            frecuencia_zap = 2200 - 2000 * p_zap
+            fase_zap += 2 * math.pi * frecuencia_zap / frecuencia_muestreo
+            zap = math.sin(fase_zap) * (1-p_zap)
+            
+        #Estallido
+        anterior = anterior * 0.5 + random.uniform(-1, 1) * 0.5
+        ruido = anterior * (1-progreso) ** 1.5
+        
+        #Retumbar
+        frecuencia_grave = 90-50*progreso
+        fase_grave += 2* math.pi * frecuencia_grave /frecuencia_muestreo
+        grave = math.sin(fase_grave) * (1-progreso) ** 2
+        
+        mezcla = zap * 0.5 + ruido * 0.7 + grave * 0.6
+        valor = int(32767 * volumen * mezcla)
+        valor = max(-32768, min(32767,valor))
+        for _ in range(canales):
+            muestras.append(valor)
+            
+    return pygame.mixer.Sound(buffer = muestras.tobytes())
+
 #Fichero con las clases de los obstaculos
 class Obstaculo:
     fuente_vida = None
     sonido_destruccion = None
+    sonido_explosion_nave = None
     
     def __init__(self, tipo, x, y, nivel = 1):
         self.tipo = tipo
@@ -315,13 +358,19 @@ class Obstaculo:
             
     def reproducir_destruccion(self):
         #Sonido al morir el enemigo
-        if self.tipo != 'Andante':
-            return
         try:
-            if Obstaculo.sonido_destruccion is None:
-                Obstaculo.sonido_destruccion = crear_destruccion()
-            if Obstaculo.sonido_destruccion:
-                Obstaculo.sonido_destruccion.play()
+            if self.tipo == 'Andante':
+                if Obstaculo.sonido_destruccion is None:
+                    Obstaculo.sonido_destruccion = crear_destruccion()
+                sonido = Obstaculo.sonido_destruccion
+            elif self.tipo == 'Volador':
+                if Obstaculo.sonido_explosion_nave is None:
+                    Obstaculo.sonido_explosion_nave = crear_explosion_nave()
+                sonido = Obstaculo.sonido_explosion_nave
+            else:
+                return
+            if sonido:
+                sonido.play()
         
         except pygame.error:
             pass
