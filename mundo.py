@@ -8,10 +8,39 @@ Created on Mon Mar 16 19:39:33 2026
 import pygame
 import random
 import math
+import array
 from config import *
+
+#Sonido de la lluvia en el nivel 2
+def crear_sonido_lluvia(duracion = 2.0, volumen = 0.10):
+    config_audio = pygame.mixer.get_init()
+    if not config_audio:
+        return None
+    frecuencia_muestreo, formato, canales = config_audio
+    total_muestras = int(frecuencia_muestreo * duracion)
+    ruido = [random.uniform(-1, 1) for _ in range(total_muestras)]
+    gotas = [random.uniform(-1, 1) * 0.6 if random.random() < 0.0012 else 0 for _ in range(total_muestras)]
+    muestras = array.array('h')
+    anterior = 0
+    
+    for vuelta in range(2):
+        for i in range(total_muestras):
+            anterior = anterior * 0.89 + ruido[i] * 0.1
+            mezcla = anterior * 1.5
+            if vuelta == 1:
+                valor = int(32767 * volumen * mezcla)
+                valor = max(-32768, min(32767, valor))
+                for _ in range(canales):
+                    muestras.append(valor)
+    return pygame.mixer.Sound(buffer = muestras.tobytes())
+
+                
 
 #Fichero del mundo del juego
 class Mundo:
+    sonido_lluvia = None
+    canal_lluvia = None
+    
     def __init__(self,nivel_numero):
         self.nivel_numero = nivel_numero
         self.nivel_config = Niveles[nivel_numero]
@@ -206,7 +235,19 @@ class Mundo:
         for copo in self.copos:
             pygame.draw.circle(pantalla, (255,255,255), (int(copo['x']),int(copo['y'])), copo['radio'])
             
-            
+    def controlar_sonido_lluvia(self, jugando):
+        try:
+            if self.lluvia and jugando:
+                if Mundo.sonido_lluvia is None:
+                    Mundo.sonido_lluvia = crear_sonido_lluvia()
+                if Mundo.sonido_lluvia and (Mundo.canal_lluvia is None or not Mundo.canal_lluvia.get_busy()):
+                    Mundo.canal_lluvia = Mundo.sonido_lluvia.play(loops = -1)
+            elif Mundo.canal_lluvia is not None:
+                Mundo.canal_lluvia.stop()
+                Mundo.canal_lluvia = None
+        except pygame.error:
+            pass
+                 
                 
                 
                 

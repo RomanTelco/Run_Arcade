@@ -205,6 +205,9 @@ class Juego:
             self.dibujar_juego()
             self.dibujar_completado()
         
+        if self.mundo:
+            self.mundo.controlar_sonido_lluvia(self.estado == 'JUGANDO')
+        
         self.presentar()
         
     def dibujar_menu(self):
