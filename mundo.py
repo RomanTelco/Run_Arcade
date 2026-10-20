@@ -11,22 +11,54 @@ import math
 import array
 from config import *
 
+#Sonido del viento en el nivel 1
+def crear_sonido_viento(duracion = 4.0, volumen = 0.02):
+    config_audio = pygame.mixer.get_init()
+    if not config_audio:
+        return None
+    
+    frecuencia_muestreo, formato, canales = config_audio
+    total_muestras = int(frecuencia_muestreo * duracion)
+    ruido = [random.uniform(-1, 1) for _ in range(total_muestras)]
+    valores = []
+    suave1 = 0
+    suave2 = 0
+    
+    for vuelta in range(2):
+        for i in range(total_muestras):
+            suave1 = suave1 * 0.93 + ruido[i] * 0.07
+            suave2 = suave2 * 0.93 + suave1 * 0.07
+            
+            if vuelta == 1:
+                fase = 2 * math.pi * i / total_muestras
+                rachas = 0.65 + 0.35 * math.sin(fase) + 0.2 * math.sin(3*fase + 1)
+                valores.append(suave2 * rachas)
+                
+    maximo = max(abs(v) for v in valores)
+    muestras = array.array('h')
+    for v in valores:
+        valor = int(32767 * volumen * v/maximo)
+        for _ in range(canales):
+            muestras.append(valor)
+            
+    return pygame.mixer.Sound(buffer = muestras.tobytes())
+
 #Sonido de la lluvia en el nivel 2
-def crear_sonido_lluvia(duracion = 2.0, volumen = 0.10):
+def crear_sonido_lluvia(duracion = 2.0, volumen = 0.02):
     config_audio = pygame.mixer.get_init()
     if not config_audio:
         return None
     frecuencia_muestreo, formato, canales = config_audio
     total_muestras = int(frecuencia_muestreo * duracion)
     ruido = [random.uniform(-1, 1) for _ in range(total_muestras)]
-    gotas = [random.uniform(-1, 1) * 0.6 if random.random() < 0.0012 else 0 for _ in range(total_muestras)]
+    gotas = [random.uniform(-1, 1) * 0.6 if random.random() < 0.0009 else 0 for _ in range(total_muestras)]
     muestras = array.array('h')
     anterior = 0
     
     for vuelta in range(2):
         for i in range(total_muestras):
             anterior = anterior * 0.89 + ruido[i] * 0.1
-            mezcla = anterior * 1.5
+            mezcla = anterior * 1.2
             if vuelta == 1:
                 valor = int(32767 * volumen * mezcla)
                 valor = max(-32768, min(32767, valor))
@@ -34,12 +66,14 @@ def crear_sonido_lluvia(duracion = 2.0, volumen = 0.10):
                     muestras.append(valor)
     return pygame.mixer.Sound(buffer = muestras.tobytes())
 
-                
+            
 
 #Fichero del mundo del juego
 class Mundo:
     sonido_lluvia = None
     canal_lluvia = None
+    sonido_viento = None
+    canal_viento = None
     
     def __init__(self,nivel_numero):
         self.nivel_numero = nivel_numero
@@ -69,6 +103,9 @@ class Mundo:
         #Generacion de elementos iniciales
         self.generar_nubes()
         self.generar_decoraciones()
+        
+        #Viento en el nivel 1
+        self.viento = (nivel_numero == 1)
         
         #Lluvia en el nivel 2
         self.lluvia = (nivel_numero == 2)
@@ -236,6 +273,9 @@ class Mundo:
             pygame.draw.circle(pantalla, (255,255,255), (int(copo['x']),int(copo['y'])), copo['radio'])
             
     def controlar_sonido_lluvia(self, jugando):
+        
+        self.controlar_sonido_viento(jugando)
+        
         try:
             if self.lluvia and jugando:
                 if Mundo.sonido_lluvia is None:
@@ -248,6 +288,19 @@ class Mundo:
         except pygame.error:
             pass
                  
-                
+    def controlar_sonido_viento(self, jugando):
+        try:
+            if self.viento and jugando:
+                if Mundo.sonido_viento is None:
+                    Mundo.sonido_viento = crear_sonido_viento()
+                if Mundo.sonido_viento and (Mundo.canal_viento is None or not Mundo.canal_viento.get_busy()):
+                    Mundo.canal_viento = Mundo.sonido_viento.play(loops = -1)
+            elif Mundo.canal_viento is not None:
+                Mundo.canal_viento.stop()
+                Mundo.canal_viento = None
+        except pygame.error:
+            pass
+                    
+                    
                 
                 
