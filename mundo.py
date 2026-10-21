@@ -66,14 +66,69 @@ def crear_sonido_lluvia(duracion = 2.0, volumen = 0.02):
                     muestras.append(valor)
     return pygame.mixer.Sound(buffer = muestras.tobytes())
 
-            
+#Sonido del bosque en el nivel 3
+def crear_sonido_bosque(duracion = 6.0, volumen = 0.06):
+    config_audio = pygame.mixer.get_init()
+    if not config_audio:
+        return None     
+    
+    frecuencia_muestreo, formato, canales = config_audio
+    total_muestras = int(frecuencia_muestreo * duracion)
+    ruido = [random.uniform(-1, 1) for _ in range(total_muestras)]
+    hojas = []
+    suave = 0
+    
+    for vuelta in range(2):
+        for i in range(total_muestras):
+            suave = suave * 0.8 + ruido[i] * 0.2
+            if vuelta == 1:
+                fase = 2 * math.pi * i / total_muestras
+                hojas.append(suave * (0.6 + 0.4 * math.sin(2 * fase)))
+    maximo_hojas = max(abs(h) for h in hojas)
+    valores = [0.4 * h / maximo_hojas for h in hojas]
+    
+    #Pajaros
+    for _ in range(4):
+        tono = random.uniform(2500, 3800)
+        cambio = random.choice([-600, 600])
+        inicio = random.uniform(0.3, duracion - 1.0)
 
+        for repeticion in range(random.choice([1,2,3])):
+            pio_inicio = int((inicio + repeticion * 0.22) * frecuencia_muestreo)
+            pio_largo = int(0.14 * frecuencia_muestreo)
+            fase_pio = 0
+            for k in range(pio_largo):
+                p = k/ pio_largo
+                frecuencia = tono + cambio * p + 150 * math.sin(40 * p)
+                fase_pio += 2 * math.pi * frecuencia / frecuencia_muestreo
+                valores[pio_inicio + k] += 0.8 * math.sin(math.pi * p) * math.sin(fase_pio)
+                
+    #Grillos
+    fase_grillo = 0
+    for i in range(total_muestras):
+        t = i / frecuencia_muestreo
+        racha = max(0, math.sin(2*math.pi * t / 2.0))
+        pulso = 1 if (t*30) % 1 < 0.5 else 0
+        fase_grillo += 2 * math.pi * 4200 / frecuencia_muestreo
+        valores[i] += 0.12 * racha * pulso * math.sin(fase_grillo)
+        
+    maximo = max(abs(v) for v in valores)
+    muestras = array.array('h')
+    for v in valores:
+        valor = int(32767 * volumen * v / maximo)
+        for _ in range(canales):
+            muestras.append(valor)
+    return pygame.mixer.Sound(buffer = muestras.tobytes())
+    
+    
 #Fichero del mundo del juego
 class Mundo:
     sonido_lluvia = None
     canal_lluvia = None
     sonido_viento = None
     canal_viento = None
+    sonido_bosque = None
+    canal_bosque = None
     
     def __init__(self,nivel_numero):
         self.nivel_numero = nivel_numero
@@ -114,7 +169,10 @@ class Mundo:
             self.generar_lluvia()
             self.capa_lluvia = pygame.Surface((Ventana_ancho, Ventana_alto), pygame.SRCALPHA)
             self.capa_lluvia.fill((0,0,40,60))
-            
+        
+        #Sonido viento nivel 3
+        self.bosque = (nivel_numero == 3)
+        
         #Nieve en el nivel 5
         self.nieve = (nivel_numero == 5)
         self.copos = []
@@ -275,6 +333,7 @@ class Mundo:
     def controlar_sonido_lluvia(self, jugando):
         
         self.controlar_sonido_viento(jugando)
+        self.controlar_sonido_bosque(jugando)
         
         try:
             if self.lluvia and jugando:
@@ -301,6 +360,18 @@ class Mundo:
         except pygame.error:
             pass
                     
-                    
+    def controlar_sonido_bosque(self, jugando):
+        try:
+            if self.bosque and jugando:
+                if Mundo.sonido_bosque is None:
+                    Mundo.sonido_bosque = crear_sonido_bosque()
+                if Mundo.sonido_bosque and (Mundo.canal_bosque is None or not Mundo.canal_bosque.get_busy()):
+                    Mundo.canal_bosque = Mundo.sonido_bosque.play(loops = -1)
+            elif Mundo.canal_bosque is not None:
+                Mundo.canal_bosque.stop()
+                Mundo.canal_bosque = None
+        except pygame.error:
+            pass
+                
                 
                 
