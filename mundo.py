@@ -119,8 +119,77 @@ def crear_sonido_bosque(duracion = 6.0, volumen = 0.06):
         for _ in range(canales):
             muestras.append(valor)
     return pygame.mixer.Sound(buffer = muestras.tobytes())
+
+
+#Sonidos del volcan en el nivel 4
+def crear_sonido_volcan(duracion = 8.0, volumen = 0.05):
+    config_audio = pygame.mixer.get_init()
+    if not config_audio:
+        return None 
     
+    frecuencia_muestreo, formato, canales = config_audio
+    total_muestras = int(frecuencia_muestreo * duracion)
     
+    ruido = [random.uniform(-1, 1) for _ in range(total_muestras)]
+    grave = []
+    suave1 = 0
+    suave2 = 0
+    
+    #Rumor grave
+    for vuelta in range(2):
+        for i in range(total_muestras):
+            suave1 = suave1 * 0.99 + ruido[i] * 0.01
+            suave2 = suave2 * 0.99 + suave1 * 0.01
+            if vuelta == 1:
+                fase = 2 * math.pi * i / total_muestras
+                grave.append(suave2 * (0.7 + 0.3 * math.sin(fase)))
+    maximo_grave = max(abs(g) for g in grave)
+    
+    valores = []
+    for i in range(total_muestras):
+        fase = 2 * math.pi * i / total_muestras
+        tono_grave = math.sin(2 * math.pi * 45 * i / frecuencia_muestreo) * 0.15 * (0.6 + 0.4 * math.sin(2*fase))
+        valores.append(0.6 * grave[i] / maximo_grave + tono_grave)
+        
+    #Burbujas
+    for _ in range(14):
+        inicio = int(random.uniform(0.1, duracion - 0.4) * frecuencia_muestreo)
+        largo = int(random.uniform(0.08, 0.15) * frecuencia_muestreo)
+        tono = random.uniform(120, 220)
+        fase_burbuja = 0
+        for k in range(largo):
+            p = k / largo
+            frecuencia = tono + 250 * p
+            fase_burbuja += 2 * math.pi * frecuencia / frecuencia_muestreo
+            valores[inicio + k] += 0.35 * math.sin(math.pi * p) * (1 - p) * math.sin(fase_burbuja)
+     
+    #Chisporreteo
+    for i in range(total_muestras - 400):
+        if random.random() < 0.0006:
+            fuerza = random.uniform(0.1, 0.35)
+            for k in range(300):
+                valores[i + k] += fuerza * random.uniform(-1, 1) * math.exp(-k / 40)
+    
+    #Errupcion
+    inicio = int(random.uniform(1.0, duracion - 2.0) * frecuencia_muestreo)
+    largo = int(1.5 * frecuencia_muestreo)
+    fase_bum = 0
+    for k in range(largo):
+        p = k / largo
+        envolvente = (1-p) ** 2 * min(1, k/2000)
+        frecuencia = 70 - 35 * p
+        fase_bum += 2 * math.pi * frecuencia / frecuencia_muestreo
+        valores[inicio + k] += envolvente * (0.7 * math.sin(fase_bum) + 0.5 * grave[inicio + k] / maximo_grave)
+    maximo = max(abs(v) for v in valores)
+    muestras = array.array('h')
+    for v in valores:
+        valor = int(32767 * volumen * v / maximo)
+        for _ in range(canales):
+            muestras.append(valor)
+    
+    return pygame.mixer.Sound(buffer = muestras.tobytes())
+
+
 #Fichero del mundo del juego
 class Mundo:
     sonido_lluvia = None
@@ -129,6 +198,8 @@ class Mundo:
     canal_viento = None
     sonido_bosque = None
     canal_bosque = None
+    sonido_volcan = None
+    canal_volcan = None
     
     def __init__(self,nivel_numero):
         self.nivel_numero = nivel_numero
@@ -172,6 +243,9 @@ class Mundo:
         
         #Sonido viento nivel 3
         self.bosque = (nivel_numero == 3)
+        
+        #Sonido del volvan en el nivel 4
+        self.volcan = (nivel_numero == 4)
         
         #Nieve en el nivel 5
         self.nieve = (nivel_numero == 5)
@@ -334,6 +408,7 @@ class Mundo:
         
         self.controlar_sonido_viento(jugando)
         self.controlar_sonido_bosque(jugando)
+        self.controlar_sonido_volcan(jugando)
         
         try:
             if self.lluvia and jugando:
@@ -370,6 +445,19 @@ class Mundo:
             elif Mundo.canal_bosque is not None:
                 Mundo.canal_bosque.stop()
                 Mundo.canal_bosque = None
+        except pygame.error:
+            pass
+        
+    def controlar_sonido_volcan(self, jugando):
+        try:
+            if self.volcan and jugando:
+                if Mundo.sonido_volcan is None:
+                    Mundo.sonido_volcan = crear_sonido_volcan()
+                if Mundo.sonido_volcan and (Mundo.canal_volcan is None or not Mundo.canal_volcan.get_busy()):
+                    Mundo.canal_volcan = Mundo.sonido_volcan.play(loops = -1)
+            elif Mundo.canal_volcan is not None:
+                Mundo.canal_volcan.stop()
+                Mundo.canal_volcan = None
         except pygame.error:
             pass
                 
