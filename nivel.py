@@ -10,6 +10,7 @@ import random
 import math
 from config import *
 from obstaculo import Obstaculo
+from jefe import Jefe
 
 #Fichero con niveles utilizados en el juego
 class Nivel:
@@ -39,6 +40,11 @@ class Nivel:
         
         #Contador de oleadas
         self.oleada_actual = 0
+        
+        #Jefe final nivel 1
+        self.tiene_jefe = numero in Jefes
+        self.jefe = None
+        self.jefe_derrotado = False
         
         #Como se generan los elementos
         self.generar_monedas()
@@ -205,8 +211,16 @@ class Nivel:
                 radio = 15 if tipo == 'invencible' else 12
                 self.monedas.append({'x':x, 'y':y, 'radio': radio, 'animacion':0, 'recolectada': False, 'tipo': tipo})
         
+        #Jefe final
+        if self.tiene_jefe and self.mundo.progreso >= 100 and not self.jefe_derrotado:
+            if self.jefe is None:
+                self.iniciar_jefe(jugador)
+            jugador.puntuacion += self.jefe.actualizar(jugador, balas)
+            if self.jefe.derrotado:
+                self.jefe_derrotado = True
+        
         #Nivel completado?
-        if self.mundo.progreso >= 100:
+        elif self.mundo.progreso >= 100:
             self.completado = True
             jugador.puntuacion += self.tiempo_restante * 10
             print(f"\n Nivel Completado! Puntuacion: {jugador.puntuacion}")
@@ -247,4 +261,21 @@ class Nivel:
         #Obstaculos
         for obstaculo in self.obstaculos:
             obstaculo.dibujar(pantalla)
+        
+        #Jefe final
+        if self.jefe:
+            self.jefe.dibujar(pantalla)
             
+    def iniciar_jefe(self, jugador):
+        #Comienzo del combate
+        self.jefe = Jefe(Jefes[self.numero], self.mundo.suelo_y)
+        
+        #Desaparecen enemigos
+        for tipo in self.enemigos_restantes:
+            self.enemigos_restantes[tipo] = 0
+        self.obstaculos = [o for o in self.obstaculos if o.x < Ventana_ancho]
+        
+        #Balas extras
+        jugador.recargar_balas(10)
+        print(f"\n JEFE FINAL: {self.jefe.nombre}")
+        

@@ -203,3 +203,8 @@ Balas = {
     'Recarga' : 10,
          }
 
+Jefes = {
+    
+    1: {'Nombre': 'Rey Babosa', 'Ancho': 140, 'Alto': 120, 'Vida':20, 'Puntos': 1000},
+    
+    }
