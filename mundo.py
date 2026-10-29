@@ -189,6 +189,52 @@ def crear_sonido_volcan(duracion = 8.0, volumen = 0.05):
     
     return pygame.mixer.Sound(buffer = muestras.tobytes())
 
+def crear_sonido_nieve(duracion = 6.0, volumen = 0.04):
+    config_audio = pygame.mixer.get_init()
+    if not config_audio:
+        return None
+    
+    frecuencia_muestreo, formato, canales = config_audio
+    total_muestras = int(frecuencia_muestreo * duracion)
+    
+    ruido = [random.uniform(-1, 1) for _ in range(total_muestras)]
+    viento = []
+    suave1 = 0
+    suave2 = 0
+    
+    #Viento frio
+    for vuelta in range(2):
+        for i in range(total_muestras):
+            suave1 = suave1 * 0.9 + ruido[i] * 0.1
+            suave2 = suave2 * 0.9 + suave1 * 0.1
+            if vuelta == 1:
+                fase = 2 * math.pi * i / total_muestras
+                rachas = 0.6 + 0.4 * math.sin(fase) + 0.15 * math.sin(2 * fase + 0.5)
+                viento.append(suave2 * rachas)
+    maximo_viento = max(abs(v) for v in viento)
+    valores = [0.6 * v / maximo_viento for v in viento]
+    
+    #Sonido de cristales de hielo
+    for _ in range(8):
+        inicio = int(random.uniform(0.2, duracion - 0.6) * frecuencia_muestreo)
+        largo = int(0.35 * frecuencia_muestreo)
+        tono = random.uniform(2500, 5000)
+        for k in range(largo):
+            t = k / frecuencia_muestreo
+            ataque = min(1, k/100)
+            envolvente = ataque * math.exp(-t / 0.08)
+            sonido = math.sin(2 * math.pi * tono * t) + 0.3 * math.sin(2 * math.pi * tono * 2.5 * t)
+            valores[inicio + k] += 0.25 * envolvente * sonido
+    maximo = max(abs(v) for v in valores)
+    muestras = array.array('h')
+    for v in valores:
+        valor = int(32767 * volumen * v / maximo)
+        for _ in range(canales):
+            muestras.append(valor)
+    
+    return pygame.mixer.Sound(buffer = muestras.tobytes())
+
+
 
 #Fichero del mundo del juego
 class Mundo:
@@ -200,6 +246,9 @@ class Mundo:
     canal_bosque = None
     sonido_volcan = None
     canal_volcan = None
+    sonido_nieve = None
+    canal_nieve = None
+    
     
     def __init__(self,nivel_numero):
         self.nivel_numero = nivel_numero
@@ -409,6 +458,7 @@ class Mundo:
         self.controlar_sonido_viento(jugando)
         self.controlar_sonido_bosque(jugando)
         self.controlar_sonido_volcan(jugando)
+        self.controlar_sonido_nieve(jugando)
         
         try:
             if self.lluvia and jugando:
@@ -461,5 +511,19 @@ class Mundo:
         except pygame.error:
             pass
                 
-                
+    def controlar_sonido_nieve(self, jugando):
+        try:
+            if self.nieve and jugando:
+                if Mundo.sonido_nieve is None:
+                    Mundo.sonido_nieve = crear_sonido_nieve()
+                if Mundo.sonido_nieve and (Mundo.canal_nieve is None or not Mundo.canal_nieve.get_busy()):
+                    Mundo.canal_nieve = Mundo.sonido_nieve.play(loops = -1)
+            elif Mundo.canal_nieve is not None:
+                Mundo.canal_nieve.stop()
+                Mundo.canal_nieve = None
+        except pygame.error:
+            pass
+                    
+        
+          
                 
