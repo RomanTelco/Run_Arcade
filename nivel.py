@@ -11,6 +11,7 @@ import math
 from config import *
 from obstaculo import Obstaculo
 from jefe import Jefe
+from jefe_ent import JefeEnt
 
 #Fichero con niveles utilizados en el juego
 class Nivel:
@@ -268,7 +269,11 @@ class Nivel:
             
     def iniciar_jefe(self, jugador):
         #Comienzo del combate
-        self.jefe = Jefe(Jefes[self.numero], self.mundo.suelo_y)
+        config_jefe = Jefes[self.numero]
+        if config_jefe.get('Tipo') == 'Ent':
+            self.jefe = JefeEnt(config_jefe, self.mundo.suelo_y)
+        else:
+            self.jefe = Jefe(config_jefe, self.mundo.suelo_y)
         
         #Desaparecen enemigos
         for tipo in self.enemigos_restantes:
@@ -276,6 +281,6 @@ class Nivel:
         self.obstaculos = [o for o in self.obstaculos if o.x < Ventana_ancho]
         
         #Balas extras
-        jugador.recargar_balas(10)
+        jugador.recargar_balas(config_jefe.get('Balas_extra', 10))
         print(f"\n JEFE FINAL: {self.jefe.nombre}")
         
