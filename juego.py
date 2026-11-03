@@ -139,6 +139,12 @@ class Juego:
         return mouse_click
     
     def actualizar(self, mouse_click):
+        #Pantalla de carga
+        if self.estado == 'CARGANDO':
+            if pygame.time.get_ticks() - self.carga_inicio >= self.carga_duracion:
+                self.estado = 'Preparando Nivel'
+            return
+        
         #Actualizacion del estado del jugador
         if self.estado != 'JUGANDO':
             return
@@ -181,6 +187,9 @@ class Juego:
             if self.nivel_actual < len(Niveles) - 1:
                 self.nivel_actual += 1
                 self.inicializar_juego(mostrar_preparacion = True)
+                #Pantalla de carga entre niveles
+                if self.nivel_actual in Pantallas_carga:
+                    self.iniciar_carga()
             else:
                 self.estado = 'COMPLETADO'
         elif self.jugador.muerto:
@@ -193,6 +202,8 @@ class Juego:
             self.dibujar_menu()
         elif self.estado == 'Preparando Nivel':
             self.dibujar_preparando_nivel()
+        elif self.estado == 'CARGANDO':
+            self.dibujar_carga()
         elif self.estado == 'JUGANDO':
             self.dibujar_juego()
         elif self.estado == 'PAUSA':
@@ -446,4 +457,45 @@ class Juego:
         
         return (x,y)
         
-                
+    def iniciar_carga(self):
+        datos = Pantallas_carga[self.nivel_actual]
+        self.carga_inicio = pygame.time.get_ticks() 
+        self.carga_duracion = datos['Duracion']
+        self.carga_consejo = datos['Consejo']
+        self.estado = 'CARGANDO'
+    
+    def dibujar_carga(self):
+        self.pantalla.fill((20,20,40))
+        tiempo = pygame.time.get_ticks() - self.carga_inicio
+        progreso = min(1, tiempo / self.carga_duracion)
+        centro = Ventana_ancho // 2
+
+        titulo = self.fuente_grande.render("Cargando", True, Colores['Texto'])
+        puntos = self.fuente_grande.render("." * (1 + (tiempo // 400) % 3), True, Colores['Texto'])
+        titulo_x = centro - titulo.get_width() // 2
+        self.pantalla.blit(titulo, (titulo_x, 180))
+        self.pantalla.blit(puntos, (titulo_x + titulo.get_width(), 180))
+        nombre = self.fuente_media.render((self.mensaje_preparacion), True, (255,215,0))
+        self.pantalla.blit(nombre, (centro - nombre.get_width() // 2, 260))
+        
+        #Barra de progreso
+        barra_ancho = 500
+        barra_alto = 24
+        barra_x = centro - barra_ancho // 2
+        barra_y = 400
+        pygame.draw.rect(self.pantalla, (50,50,70), (barra_x, barra_y, barra_ancho, barra_alto))
+        pygame.draw.rect(self.pantalla, Colores['Barra_vida'], (barra_x, barra_y, int(barra_ancho * progreso), barra_alto))
+        pygame.draw.rect(self.pantalla, (255,255,255), (barra_x, barra_y, barra_ancho, barra_alto), 2)
+        
+        
+        #Corredor que avanza por la barra
+        salto = abs(math.sin(tiempo * 0.012)) * 14
+        corredor_x = barra_x + int(barra_ancho * progreso) - 10
+        pygame.draw.rect(self.pantalla, Colores['Jugador'], (corredor_x, barra_y - 36 - int(salto), 20, 32))
+        
+        #Porcentaje y consejo
+        porcentaje = self.fuente_pequeña.render(f"{int(progreso * 100)}%", True, Colores['Texto'])
+        self.pantalla.blit(porcentaje, (centro - porcentaje.get_width() // 2, barra_y + 40))
+        consejo = self.fuente_muy_pequeña.render((self.carga_consejo), True, (200,200,220))
+        self.pantalla.blit(consejo, (centro - consejo.get_width() // 2, 540))
+        
