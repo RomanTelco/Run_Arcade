@@ -210,5 +210,11 @@ Jefes = {
     }
 
 Pantallas_carga = {
-    1: {'Duracion': 8000, 'Consejo': 'Consejo: salta encima de los enemigos andantes para derrotarlos.'}
+    1: {'Duracion': 5000, 'Consejo': 'Consejo: salta encima de los enemigos andantes para derrotarlos.'},
+    2: {'Duracion': 5000, 'Consejo': 'Consejo: dispara al jefe con el clic izquierdo y esquiva sus proyectiles.'},
+    3: {'Duracion': 5000, 'Consejo': 'Consejo: usa el doble salto para esquivar a los enemigos voladores.'},
+    4: {'Duracion': 5000, 'Consejo': 'Consejo: la moneda azul te hace invencible durante unos segundos.'},
+    5: {'Duracion': 5000, 'Consejo': 'Consejo: recoge monedas para conseguir balas y vidas extra.'},
+    6: {'Duracion': 5000, 'Consejo': 'Consejo: salta sobre la cabeza del jefe para hacerle daño.'},
+    7: {'Duracion': 5000, 'Consejo': 'Consejo: guarda balas para el combate contra el jefe final.'},
     }
