@@ -207,6 +207,7 @@ Jefes = {
     
     1: {'Nombre': 'Rey Babosa', 'Ancho': 140, 'Alto': 120, 'Vida':20, 'Puntos': 1000},
     2: {'Nombre': 'Ent Ancestral', 'Tipo': 'Ent', 'Ancho': 110, 'Alto': 260, 'Vida': 15, 'Puntos': 2000, 'Balas_extra': 20},    
+    3: {'Nombre': 'Golem de Piedra', 'Tipo': 'Golem', 'Ancho': 120, 'Alto': 190, 'Vida': 14, 'Puntos': 3000, 'Balas_extra': 30},
     }
 
 Pantallas_carga = {

@@ -12,6 +12,10 @@ from config import *
 from obstaculo import Obstaculo
 from jefe import Jefe
 from jefe_ent import JefeEnt
+from jefe_golem import JefeGolem
+
+#Clase de jefes que se usan en el juego
+TIPOS_JEFE = {'Ent': JefeEnt, 'Golem': JefeGolem}
 
 #Fichero con niveles utilizados en el juego
 class Nivel:
@@ -270,10 +274,8 @@ class Nivel:
     def iniciar_jefe(self, jugador):
         #Comienzo del combate
         config_jefe = Jefes[self.numero]
-        if config_jefe.get('Tipo') == 'Ent':
-            self.jefe = JefeEnt(config_jefe, self.mundo.suelo_y)
-        else:
-            self.jefe = Jefe(config_jefe, self.mundo.suelo_y)
+        clase_jefe = TIPOS_JEFE.get(config_jefe.get('Tipo'), Jefe)
+        self.jefe = clase_jefe(config_jefe, self.mundo.suelo_y)
         
         #Desaparecen enemigos
         for tipo in self.enemigos_restantes:

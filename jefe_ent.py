@@ -92,7 +92,6 @@ class JefeEnt(Jefe):
         super().morir()
     
     def dibujar(self, pantalla):
-        #Bolas de baba
         for p in self.proyectiles:
             centro = (int(p['x']), int(p['y']))
             radio = p['radio']
