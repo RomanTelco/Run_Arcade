@@ -209,6 +209,7 @@ Jefes = {
     2: {'Nombre': 'Ent Ancestral', 'Tipo': 'Ent', 'Ancho': 110, 'Alto': 260, 'Vida': 15, 'Puntos': 2000, 'Balas_extra': 20},    
     3: {'Nombre': 'Golem de Piedra', 'Tipo': 'Golem', 'Ancho': 120, 'Alto': 190, 'Vida': 14, 'Puntos': 3000, 'Balas_extra': 30},
     4: {'Nombre': 'Dragon de Magma', 'Tipo': 'Dragon', 'Ancho': 150, 'Alto': 120, 'Vida': 22, 'Puntos': 4000, 'Balas_extra': 30},
+    5: {'Nombre': 'Reina de Hielo', 'Tipo': 'Reina', 'Ancho': 170, 'Alto': 190, 'Vida': 29, 'Puntos': 5000, 'Balas_extra': 30},
     }
 
 Pantallas_carga = {
