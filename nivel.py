@@ -15,9 +15,10 @@ from jefe_ent import JefeEnt
 from jefe_golem import JefeGolem
 from jefe_dragon import JefeDragon
 from jefe_reina import JefeReina
+from jefe_caballero import JefeCaballero
 
 #Clase de jefes que se usan en el juego
-TIPOS_JEFE = {'Ent': JefeEnt, 'Golem': JefeGolem, 'Dragon': JefeDragon, 'Reina': JefeReina}
+TIPOS_JEFE = {'Ent': JefeEnt, 'Golem': JefeGolem, 'Dragon': JefeDragon, 'Reina': JefeReina, 'Caballero': JefeCaballero}
 
 #Fichero con niveles utilizados en el juego
 class Nivel:
