@@ -234,7 +234,105 @@ def crear_sonido_nieve(duracion = 6.0, volumen = 0.04):
     
     return pygame.mixer.Sound(buffer = muestras.tobytes())
 
-
+def crear_sonido_castillo(duracion = 10.0, volumen = 0.05):
+    config_audio = pygame.mixer.get_init()
+    if not config_audio:
+        return None
+    
+    frecuencia_muestreo, formato, canales = config_audio
+    total_muestras = int(frecuencia_muestreo * duracion)
+    
+    ruido = [random.uniform(-1, 1) for _ in range(total_muestras)]
+    valores = [0.0] * total_muestras
+    
+    #Rumor grave de fondo
+    suave1 = 0
+    suave2 = 0
+    for i in range(total_muestras):
+        suave1 = suave1 * 0.995 + ruido[i] * 0.005
+        suave2 = suave2 * 0.995 + suave1 * 0.005
+        fase = 2 * math.pi * i / total_muestras
+        valores[i] += suave2 * (0.7 + 0.3 * math.sin(fase)) * 2.5
+    
+    #Drone grave
+    fase1 = 0
+    fase2 = 0
+    for i in range(total_muestras):
+        t = i / frecuencia_muestreo
+        fase_drone = 2 * math.pi * t / duracion
+        mod = 0.6 + 0.4 * math.sin(2 * fase_drone)
+        fase1 += 2 * math.pi * 55 / frecuencia_muestreo
+        fase2 += 2 * math.pi * 78 / frecuencia_muestreo
+        valores[i] += 0.22 * mod * math.sin(fase1)
+        valores[i] += 0.18 * mod * math.sin(fase2)
+        
+    #Campanas
+    def campana(inicio_t, tono, fuerza):
+        inicio = int(inicio_t * frecuencia_muestreo)
+        largo = int(2.5 * frecuencia_muestreo)
+        for k in range(largo):
+            if inicio + k >= total_muestras:
+                break
+            t = k/frecuencia_muestreo
+            ataque = min(1, k / 200)
+            envolvente = ataque * math.exp(-t / 0.8)
+            parciales = (math.sin(2 * math.pi * tono * t) + 0.5 * math.sin(2* math.pi * tono * 2.01 * t) + 0.3 * math.sin(2 * math.pi * tono * 3.0 * t) + 0.2 * math.sin(2 * math.pi * tono * 4.2 * t))
+            valores[inicio + k] += fuerza * envolvente * parciales
+    
+    campana(0.5, 220, 0.22)
+    campana(1.2, 165, 0.15)
+    campana(4.0, 196, 0.20)
+    campana(4.7, 147, 0.13)
+    campana(7.5, 175, 0.18)
+    
+    #Crujidos
+    for _ in range(6):
+        inicio = int(random.uniform(0.5, duracion - 0.5) * frecuencia_muestreo)
+        largo = int(random.uniform(0.05, 0.12) * frecuencia_muestreo)
+        fuerza = random.uniform(0.08, 0.2)
+        for k in range(largo):
+            if inicio + k >= total_muestras:
+                break
+            p = k / largo
+            valores[inicio + k] += fuerza * math.sin(math.pi * p) * ruido[inicio + k]
+            
+    #Susurros
+    suave_sus = 0
+    for i in range(total_muestras):
+        suave_sus = suave_sus * 0.75 + ruido[i] * 0.25
+        t = i / frecuencia_muestreo
+        #Aparece solo en ciertos momentos
+        ventana = max(0, math.sin(2 * math.pi * t / 3.5)) ** 3
+        valores[i] += 0.25 * suave_sus * ventana
+    
+    #Pulso cardiaco
+    for i in range(total_muestras):
+        t = i / frecuencia_muestreo
+        pulso_fase = (t % 1.4) / 1.4
+        if pulso_fase < 0.08:
+            env = math.sin(math.pi * pulso_fase / 0.08)
+            valores[i] += 0.3 * env * math.sin(2 * math.pi * 45 * t)
+        elif 0.18 < pulso_fase < 0.24:
+            env = math.sin(math.pi * (pulso_fase - 0.18) / 0.06)
+            valores[i] += 0.18 * env * math.sin(2 * math.pi * 40 * t)
+            
+    #Fade in / out
+    fade = int(0.5 * frecuencia_muestreo)
+    for i in range(fade):
+        v = i / fade
+        valores[i] *= v
+        valores[-1 - i] *= v
+    
+    #Normalizar y convertir
+    maximo = max(abs(v) for v in valores) or 1
+    muestras = array.array('h')
+    for v in valores:
+        valor = int(32767 * volumen * v / maximo)
+        valor = max(-32768, min(32767, valor))
+        for __ in range(canales):
+            muestras.append(valor)
+    
+    return pygame.mixer.Sound(buffer = muestras.tobytes())
 
 #Fichero del mundo del juego
 class Mundo:
@@ -248,6 +346,8 @@ class Mundo:
     canal_volcan = None
     sonido_nieve = None
     canal_nieve = None
+    sonido_castillo = None
+    canal_castillo = None
     
     
     def __init__(self,nivel_numero):
@@ -301,6 +401,9 @@ class Mundo:
         self.copos = []
         if self.nieve:
             self.generar_nieve()
+        
+        #Sonido en el nivel 6
+        self.castillo = (nivel_numero == 6)
     
     
     def iniciar_cronometro(self):
@@ -459,6 +562,7 @@ class Mundo:
         self.controlar_sonido_bosque(jugando)
         self.controlar_sonido_volcan(jugando)
         self.controlar_sonido_nieve(jugando)
+        self.controlar_sonido_castillo(jugando)
         
         try:
             if self.lluvia and jugando:
@@ -524,6 +628,17 @@ class Mundo:
         except pygame.error:
             pass
                     
-        
+    def controlar_sonido_castillo(self, jugando):
+        try:
+            if self.castillo and jugando:
+                if Mundo.sonido_castillo is None:
+                    Mundo.sonido_castillo = crear_sonido_castillo()
+                if Mundo.sonido_castillo and (Mundo.canal_castillo is None or not Mundo.canal_castillo.get_busy()):
+                    Mundo.canal_castillo = Mundo.sonido_castillo.play(loops = -1)
+            elif Mundo.canal_castillo is not None:
+                Mundo.canal_castillo.stop()
+                Mundo.canal_castillo = None
+        except pygame.error:
+            pass
           
                 

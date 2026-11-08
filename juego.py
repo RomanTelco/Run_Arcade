@@ -12,6 +12,7 @@ from config import *
 from jugador import Jugador
 from mundo import Mundo
 from nivel import Nivel
+from misil import crear_imagen_misil, dibujar_misil
 
 #Fichero con las funciones principales del juego
 class Juego:
@@ -50,6 +51,7 @@ class Juego:
         #Posicion del raton
         self.mouse_pos = (Ventana_ancho//2, Ventana_alto//2)
         self.bala_surf_base = pygame.Surface((Balas['Ancho'], Balas['Alto']), pygame.SRCALPHA)
+        self.click_derecho = False
         self.bala_surf_base.fill(Colores['Bala'])
         pygame.draw.rect(self.bala_surf_base, (255,255,200), (0,0,Balas['Ancho'],Balas['Alto']),1)
         pygame.draw.rect(self.bala_surf_base, (255,255,150), (2,1,Balas['Ancho']-4,Balas['Alto']-2),1)
@@ -83,6 +85,7 @@ class Juego:
     def manejar_eventos(self):
         #Eventos del juego
         mouse_click = False
+        self.click_derecho = False
         
         for evento in pygame.event.get():
             if evento.type == pygame.QUIT:
@@ -131,6 +134,9 @@ class Juego:
                 if evento.button == 1:
                     self.mouse_pos = self.convertir_coordenadas_raton(evento.pos)
                     mouse_click = True
+                elif evento.button == 3:
+                    self.mouse_pos = self.convertir_coordenadas_raton(evento.pos)
+                    self.click_derecho = True
                     
             if evento.type == pygame.MOUSEBUTTONUP and self.estado == 'JUGANDO':
                 if evento.button == 1:
@@ -149,11 +155,11 @@ class Juego:
         if self.estado != 'JUGANDO':
             return
         
-        #Obtancion de las teclas presionadas
+        #Obtencion de las teclas presionadas
         teclas = pygame.key.get_pressed()
         
         #Actualizacion del jugador y obtancion de nuevas balas
-        nuevas_balas = self.jugador.actualizar(teclas, mouse_click, self.mouse_pos)
+        nuevas_balas = self.jugador.actualizar(teclas, mouse_click, self.mouse_pos, self.click_derecho)
         self.balas.extend(nuevas_balas)
         
         #Actualizacion dle mundo
@@ -296,7 +302,11 @@ class Juego:
         
         #Balas
         for bala in self.balas:
-            if 'angulo' in bala:             
+            if bala.get('tipo') == 'misil':
+                if not hasattr(self, 'misil_imagen'):
+                    self.misil_imagen = crear_imagen_misil()
+                dibujar_misil(self.pantalla, bala, self.misil_imagen)
+            elif 'angulo' in bala:             
                 #Rotacion de la bala segun el angulo
                 angulo_grados = -math.degrees(bala['angulo'])
                 bala_rotada = pygame.transform.rotate(self.bala_surf_base, angulo_grados)
@@ -328,6 +338,10 @@ class Juego:
         #Balas
         balas_texto = self.fuente_pequeña.render(f"BALAS: {self.jugador.balas}", True, Colores['Bala'])
         self.pantalla.blit(balas_texto, (20,45))
+        
+        #Misiles
+        misiles_texto = self.fuente_pequeña.render(f"MISILES: {self.jugador.misiles}", True, (255,120,80))
+        self.pantalla.blit(misiles_texto, (410,10))
         
         #Puntos
         puntos_texto = self.fuente_pequeña.render(f"PUNTOS: {self.jugador.puntuacion}", True, Colores['Texto'])

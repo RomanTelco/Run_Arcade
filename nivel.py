@@ -280,6 +280,7 @@ class Nivel:
         config_jefe = Jefes[self.numero]
         clase_jefe = TIPOS_JEFE.get(config_jefe.get('Tipo'), Jefe)
         self.jefe = clase_jefe(config_jefe, self.mundo.suelo_y)
+        jugador.recargar_misiles(3)
         
         #Desaparecen enemigos
         for tipo in self.enemigos_restantes:

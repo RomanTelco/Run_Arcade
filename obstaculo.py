@@ -267,7 +267,7 @@ class Obstaculo:
             if self.tipo == 'Bloque':
                 return 0
             
-            self.vida -= 1
+            self.vida -= bala.get('daño', 1)
             self.daño_tiempo = 20
             
             if self.vida <= 0:

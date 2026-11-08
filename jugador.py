@@ -9,6 +9,7 @@ import pygame
 import math
 import array
 from config import *
+from misil import disparar_misil
 
 #Bip del salto del jugador principal
 def crear_bip(frecuencia = 880, duracion = 0.08, volumen = 0.3):
@@ -77,6 +78,10 @@ class Jugador:
         #Estados del personaje pricipal
         self.vidas = Config_Jugador['Vidas']
         self.balas = Config_Jugador['Balas']
+        self.misiles = 5
+        self.max_misiles = 10
+        self.tiempo_entre_misil = 0
+        self.sonido_misil = None
         self.puntuacion = 0
         self.monedas = 0
         self.monedas_para_bala = 0
@@ -109,7 +114,7 @@ class Jugador:
         self.invencible_por_moneda = False
         
     #En caso de la muerte del personaje principal
-    def actualizar(self, teclas, mouse_click = False, mouse_pos = None):
+    def actualizar(self, teclas, mouse_click = False, mouse_pos = None, click_derecho = False):
         if self.muerto:
             return []
         
@@ -117,6 +122,8 @@ class Jugador:
         
         if self.tiempo_entre_disparo > 0:
             self.tiempo_entre_disparo -= 1
+        if self.tiempo_entre_misil > 0:
+            self.tiempo_entre_misil -= 1
         
         #Actualizacion de la posicion del raton para apuntar al enemigo
         if mouse_pos:
@@ -140,6 +147,12 @@ class Jugador:
             bala = self.disparar_apuntando()
             if bala:
                 balas_disparadas.append(bala)
+        
+        #Disparo del misil con click derecho del raton
+        if click_derecho:
+            misil = disparar_misil(self)
+            if misil:
+                balas_disparadas.append(misil)
 
         
         #Se aplica la fisica del personaje pricipal
@@ -457,6 +470,9 @@ class Jugador:
             self.balas = min(self.balas + 1, Balas['Maximo_Balas'])
             print(f"Bala extra!! Balas totales : {self.balas}")
         
+        #25 monedas = 1 misil
+        if self.monedas % 25 == 0:
+            self.recargar_misiles(1)
         #100 monedas = 1 vida
         if self.monedas % 100 == 0:
             self.vidas = min(self.vidas + 1, 5)
@@ -486,4 +502,7 @@ class Jugador:
                 self.sonido_disparo.play()
         except pygame.error:
             pass
+   
+    def recargar_misiles(self, cantidad):
+        self.misiles = min(self.misiles + cantidad, self.max_misiles)
         

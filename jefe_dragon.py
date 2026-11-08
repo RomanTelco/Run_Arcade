@@ -112,7 +112,7 @@ class JefeDragon(Jefe):
             bala_rect = pygame.Rect(bala['x'], bala['y'], bala['ancho'], bala['alto'])
             if self.rect.colliderect(bala_rect):
                 balas.remove(bala)
-                self.recibir_daño(daño)
+                self.recibir_daño(daño * bala.get('daño', 1))
                 puntos += 25
         return puntos
     
