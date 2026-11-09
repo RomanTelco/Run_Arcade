@@ -106,7 +106,7 @@ Niveles = [
         {   
             #Tutorial
             'Nombre' : 'Tutorial',
-            'Tiempo_limite' : 40,
+            'Tiempo_limite' : 10,
             'Enemigos' : {'Bloque':30, 'Andante':35, 'Volador':10},
             'Monedas':30,
             'Velocidad': -4,
@@ -117,7 +117,7 @@ Niveles = [
         {
             #Nivel 1: Facil
             'Nombre' : 'Nivel 1 - Pradera',
-            'Tiempo_limite' : 60,
+            'Tiempo_limite' : 10,
             'Enemigos' : {'Bloque':50, 'Andante':55, 'Volador':25},
             'Monedas':40,
             'Velocidad': -5,
@@ -128,7 +128,7 @@ Niveles = [
         {
             #Nivel 2: Intermedio
             'Nombre' : 'Nivel 2 - Bosque',
-            'Tiempo_limite' : 80,
+            'Tiempo_limite' : 10,
             'Enemigos' : {'Bloque':70, 'Andante':70, 'Volador':34},
             'Monedas':50,
             'Velocidad': -6,
@@ -139,7 +139,7 @@ Niveles = [
         {
             #Nivel 3: Dificil
             'Nombre' : 'Nivel 3 - Montaña',
-            'Tiempo_limite' : 100,
+            'Tiempo_limite' : 10,
             'Enemigos' : {'Bloque':100, 'Andante':85, 'Volador':50},
             'Monedas':60,
             'Velocidad': -7,
@@ -151,7 +151,7 @@ Niveles = [
         {
             #Nivel 4: Muy Dificil
             'Nombre' : 'Nivel 4 - Volcan',
-            'Tiempo_limite' : 120,
+            'Tiempo_limite' : 10,
             'Enemigos' : {'Bloque':130, 'Andante':80, 'Volador':75},
             'Monedas':70,
             'Velocidad': -8,
@@ -162,7 +162,7 @@ Niveles = [
         {
             #Nivel 5: Experto
             'Nombre' : 'Nivel 5 - Hielo',
-            'Tiempo_limite' : 140,
+            'Tiempo_limite' : 10,
             'Enemigos' : {'Bloque':120, 'Andante':90, 'Volador':80},
             'Monedas':80,
             'Velocidad': -8,
@@ -173,7 +173,7 @@ Niveles = [
         {
             #Nivel 6: General
             'Nombre' : 'Nivel 6 - Castillo Oscuro',
-            'Tiempo_limite' : 160,
+            'Tiempo_limite' : 10,
             'Enemigos' : {'Bloque':120, 'Andante':90, 'Volador':85},
             'Monedas':100,
             'Velocidad': -9,

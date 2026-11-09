@@ -334,6 +334,129 @@ def crear_sonido_castillo(duracion = 10.0, volumen = 0.05):
     
     return pygame.mixer.Sound(buffer = muestras.tobytes())
 
+def crear_sonido_epico(duracion = 12.0, volumen = 0.07):
+    config_audio = pygame.mixer.get_init()
+    if not config_audio:
+        return None
+    
+    frecuencia_muestreo, formato, canales = config_audio
+    total_muestras = int(frecuencia_muestreo * duracion)
+    
+    ruido = [random.uniform(-1, 1) for _ in range(total_muestras)]
+    valores = [0.0] * total_muestras
+    
+    #Drone grave epico
+    fase_raiz = 0
+    fase_quinta = 0
+    fase_octava = 0
+    for i in range(total_muestras):
+        t = i / frecuencia_muestreo
+        mod = 0.7 + 0.3 * math.sin(2 * math.pi * t / duracion)
+        fase_raiz += 2 * math.pi * 55 / frecuencia_muestreo
+        fase_quinta += 2 * math.pi * 82.5 / frecuencia_muestreo
+        fase_octava += 2 * math.pi * 110 / frecuencia_muestreo
+        valores[i] += 0.22 * mod * math.sin(fase_raiz)
+        valores[i] += 0.14 * mod * math.sin(fase_quinta)
+        valores[i] += 0.10 * mod * math.sin(fase_octava)
+        
+    #Coro epico
+    coro_notas = [220, 261.33, 329.63, 440]
+    for nota in coro_notas:
+        for desafine in (-1.5, 0, 1.5):
+            fase_c = 0
+            freq = nota + desafine
+            for i in range(total_muestras):
+                t = i / frecuencia_muestreo
+                #Entrada y salida del coro
+                env = math.sin(math.pi * t / duracion) ** 0.5
+                vib = 1 + 0.004 * math.sin(2 * math.pi * 5.5 * t)
+                fase_c += 2 * math.pi * freq * vib / frecuencia_muestreo
+                valores[i] += 0.035 * env * math.sin(fase_c)
+    
+    #Cuerdas ascendentes
+    fase_cuerdas = 0
+    for i in range(total_muestras):
+        t = i / frecuencia_muestreo
+        progreso = t / duracion
+        freq = 110 + 110 * progreso
+        fase_cuerdas += 2 * math.pi * freq / frecuencia_muestreo
+        env = min(1, t / 2.0) * (1 - progreso) ** 0.5
+        #Onda aterradora
+        diente = ((fase_cuerdas / (2 * math.pi)) % 1.0) * 2 - 1
+        valores[i] += 0.08 * env * diente
+        
+    #Tambores de guerra
+    bpm = 100
+    beat = 60.0 / bpm
+    patron = [1.0, 0.4, 0.5, 0.0, 1.0, 0.4, 0.5, 0.3]
+    for i in range(total_muestras):
+        t = i / frecuencia_muestreo
+        beat_idx = int(t / beat) % len(patron)
+        fuerza = patron[beat_idx]
+        if fuerza > 0:
+            t_beat = t - int(t / beat) * beat
+            #Envolvente del tambor
+            if t_beat < 0.25:
+                env = math.exp(-t_beat * 20)
+                fase_t = 2 * math.pi * 80 * t
+                cuerpo = math.sin(fase_t) * 0.7
+                ataque = ruido[i] * math.exp(-t_beat * 40) * 0.5
+                valores[i] += fuerza * env * (cuerpo + ataque) * 0.5
+                
+    #Platillos
+    for k in range(int(duracion / (beat * 4)) + 1):
+        inicio = int(k * beat * 4 * frecuencia_muestreo)
+        largo = int(1.5 * frecuencia_muestreo)
+        for j in range(largo):
+            if inicio + j >= total_muestras:
+                break
+            t = j / frecuencia_muestreo
+            env = math.exp(-t * 2.5)
+            metal = (math.sin(2 * math.pi * 3200 * t) * 0.4 + math.sin(2 * math.pi * 4700 * t) * 0.3 +  ruido[inicio + j] * 0.3)
+            valores[inicio + j] += 0.06 * env * metal
+            
+    #Timbales epicos
+    golpes_t = [2.0, 4.0, 6.0, 8.0, 10.0]
+    for idx, gt in enumerate(golpes_t):
+        if gt >= duracion:
+            break
+        inicio = int(gt * frecuencia_muestreo)
+        largo = int(0.8 * frecuencia_muestreo)
+        freq_timbal = 150 + idx * 20
+        fase_tb = 0
+        for j in range(largo):
+            if inicio + j >= total_muestras:
+                break
+            t = j / frecuencia_muestreo
+            env = math.exp(-t * 6)
+            freq_actual = freq_timbal * (1 - 0.4 * min(1,t * 5))
+            fase_tb += 2 * math.pi * freq_actual / frecuencia_muestreo
+            valores[inicio + j] += 0.15 * env * math.sin(fase_tb)
+            
+    #Aire
+    suave1 = 0
+    suave2 = 0
+    for i in range(total_muestras):
+        suave1 = suave1 * 0.99 + ruido[i] * 0.01
+        suave2 = suave2 * 0.99 + suave1 * 0.01
+        valores[i] += suave2 * 1.5
+    fade = int(0.6 * frecuencia_muestreo)
+    for i in range(fade):
+        v = i / fade
+        valores[i] *= v
+        valores[-1 - i] *= v
+        
+    #Normalizamos y cconvertimos el sonido
+    maximo = max(abs(v) for v in valores) or 1
+    muestras = array.array('h')
+    for v in valores:
+        valor = int(32767 * volumen * v / maximo)
+        valor = max(-32768, min(32767, valor))
+        for __ in range(canales):
+            muestras.append(valor)
+    
+    return pygame.mixer.Sound(buffer = muestras.tobytes())
+
 #Fichero del mundo del juego
 class Mundo:
     sonido_lluvia = None
@@ -348,6 +471,8 @@ class Mundo:
     canal_nieve = None
     sonido_castillo = None
     canal_castillo = None
+    sonido_epico = None
+    canal_epico = None
     
     
     def __init__(self,nivel_numero):
@@ -404,6 +529,9 @@ class Mundo:
         
         #Sonido en el nivel 6
         self.castillo = (nivel_numero == 6)
+        
+        #Sonido en el nivel 7
+        self.epico = (nivel_numero == 7)
     
     
     def iniciar_cronometro(self):
@@ -563,6 +691,7 @@ class Mundo:
         self.controlar_sonido_volcan(jugando)
         self.controlar_sonido_nieve(jugando)
         self.controlar_sonido_castillo(jugando)
+        self.controlar_sonido_epico(jugando)
         
         try:
             if self.lluvia and jugando:
@@ -640,5 +769,17 @@ class Mundo:
                 Mundo.canal_castillo = None
         except pygame.error:
             pass
-          
+    
+    def controlar_sonido_epico(self, jugando):
+        try:
+            if self.epico and jugando:
+                if Mundo.sonido_epico is None:
+                    Mundo.sonido_epico = crear_sonido_epico()
+                if Mundo.sonido_epico and (Mundo.canal_epico is None or not Mundo.canal_epico.get_busy()):
+                    Mundo.canal_epico = Mundo.sonido_epico.play(loops = -1)
+            elif Mundo.canal_epico is not None:
+                Mundo.canal_epico.stop()
+                Mundo.canal_epico = None
+        except pygame.error:
+            pass
                 
