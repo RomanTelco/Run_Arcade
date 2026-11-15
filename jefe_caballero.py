@@ -172,7 +172,7 @@ class JefeCaballero(Jefe):
         for sombra in self.sombras:
             if sombra['tiempo'] <= 30 and (sombra['tiempo'] // 3) % 2 == 1:
                 continue
-            self.dibujar_caballero(pantalla, int(sombra['x']), self.suelo_y - self.alto, True, 'caminando')
+            #self.dibujar_caballero(pantalla, int(sombra['x']), self.suelo_y - self.alto, True, 'caminando')
             self.dibujar_clon(pantalla, int(sombra['x']))
             
         self.dibujar_cuerpo(pantalla)
@@ -186,7 +186,8 @@ class JefeCaballero(Jefe):
         y = self.suelo_y - self.alto
         def dibujar(s, ox, oy):
             self.dibujar_caballero(s, ox, oy, True, 'caminando')
-        pantalla.blit(sprite, (z - sox, y - soy))
+        sprite, sox, soy = arte.crear_sprite(self.ancho, self.alto, dibujar, factor = 3, margen = 80)
+        pantalla.blit(sprite, (int(x) - sox, int(y) - soy))
         
     def dibujar_caballero(self, pantalla, x, y, clon, fase):
         centro = x + self.ancho // 2
