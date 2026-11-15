@@ -13,6 +13,7 @@ from jugador import Jugador
 from mundo import Mundo
 from nivel import Nivel
 from misil import crear_imagen_misil, dibujar_misil
+import arte
 
 #Fichero con las funciones principales del juego
 class Juego:
@@ -322,6 +323,7 @@ class Juego:
         
         #Interfaz
         self.dibujar_interfaz()
+        #arte.aplicar_crt(self.pantalla)
         
     def dibujar_interfaz(self):
         #Interfaz del usuario

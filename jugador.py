@@ -10,6 +10,7 @@ import math
 import array
 from config import *
 from misil import disparar_misil
+from sprites import dibujar_jugador
 
 #Bip del salto del jugador principal
 def crear_bip(frecuencia = 880, duracion = 0.08, volumen = 0.3):
@@ -316,126 +317,127 @@ class Jugador:
                 self.invencible_por_moneda = False
     
     def dibujar(self,pantalla):
-        #Dibujamos al personaje principal
-        color_base = Colores['Jugador']     #Rojo
-        color_sombra = (180,0,0)            #Rojo oscuro
-        color_luz = (255,80,80)             #Rojo claro         
+        dibujar_jugador(pantalla, self)
+        # #Dibujamos al personaje principal
+        # color_base = Colores['Jugador']     #Rojo
+        # color_sombra = (180,0,0)            #Rojo oscuro
+        # color_luz = (255,80,80)             #Rojo claro         
         
-        if self.invencible:
-            if self.tiempo_invencible > Config_Jugador['Tiempo invencible']:
-                if self.invencible and self.tiempo_invencible % 10 < 5:
-                    color_cuerpo = (0,200,255)
-                    color_sombra = (0,120,180)
-                    color_luz = (150,240,255)
-                else:
-                    color_cuerpo = (100,220,255)
-                    color_sombra = (0,150,200)
-                    color_luz = (200,250,255)
-            else:
-                if self.invencible and self.tiempo_invencible % 10 < 5:
-                    color_cuerpo = (255,255,255)
-                    color_sombra = (200,200,200)
-                    color_luz = (255,255,255)
+        # if self.invencible:
+        #     if self.tiempo_invencible > Config_Jugador['Tiempo invencible']:
+        #         if self.invencible and self.tiempo_invencible % 10 < 5:
+        #             color_cuerpo = (0,200,255)
+        #             color_sombra = (0,120,180)
+        #             color_luz = (150,240,255)
+        #         else:
+        #             color_cuerpo = (100,220,255)
+        #             color_sombra = (0,150,200)
+        #             color_luz = (200,250,255)
+        #     else:
+        #         if self.invencible and self.tiempo_invencible % 10 < 5:
+        #             color_cuerpo = (255,255,255)
+        #             color_sombra = (200,200,200)
+        #             color_luz = (255,255,255)
             
-        #Cuerpo del personaje principal
-        sombra_rect = pygame.Rect(self.x + 5, self.y + 5, self.ancho, self.alto)
-        pygame.draw.rect(pantalla, color_sombra, sombra_rect)
+        # #Cuerpo del personaje principal
+        # sombra_rect = pygame.Rect(self.x + 5, self.y + 5, self.ancho, self.alto)
+        # pygame.draw.rect(pantalla, color_sombra, sombra_rect)
         
-        cuerpo_rect = pygame.Rect(self.x, self.y, self.ancho, self.alto)
-        pygame.draw.rect(pantalla, color_base, cuerpo_rect)
+        # cuerpo_rect = pygame.Rect(self.x, self.y, self.ancho, self.alto)
+        # pygame.draw.rect(pantalla, color_base, cuerpo_rect)
         
-        #Degradado lateral izquierdo
-        pygame.draw.rect(pantalla, color_sombra, (self.x, self.y, 8, self.alto))
+        # #Degradado lateral izquierdo
+        # pygame.draw.rect(pantalla, color_sombra, (self.x, self.y, 8, self.alto))
         
-        #Degradado lateral derecho
-        pygame.draw.rect(pantalla, color_luz, (self.x + self.ancho - 8, self.y, 8, self.alto))
+        # #Degradado lateral derecho
+        # pygame.draw.rect(pantalla, color_luz, (self.x + self.ancho - 8, self.y, 8, self.alto))
         
-        #Cabeza
-        cabeza_rect = pygame.Rect(self.x + 5, self.y - 5, self.ancho - 10, 30)
-        pygame.draw.rect(pantalla, color_base, cabeza_rect)
+        # #Cabeza
+        # cabeza_rect = pygame.Rect(self.x + 5, self.y - 5, self.ancho - 10, 30)
+        # pygame.draw.rect(pantalla, color_base, cabeza_rect)
         
-        #Parte superior de la cabeza redondeada
-        pygame.draw.rect(pantalla, color_base, (self.x + 5, self.y - 8, self.ancho - 10, 15))
+        # #Parte superior de la cabeza redondeada
+        # pygame.draw.rect(pantalla, color_base, (self.x + 5, self.y - 8, self.ancho - 10, 15))
 
-        #Sombra debajo de la cabeza
-        pygame.draw.rect(pantalla, color_sombra, (self.x + 5, self.y + 20, self.ancho - 10, 5))
+        # #Sombra debajo de la cabeza
+        # pygame.draw.rect(pantalla, color_sombra, (self.x + 5, self.y + 20, self.ancho - 10, 5))
         
-        #Ojos
-        ojo_offset = 0
-        if self.estado == 'corriendo':
-            ojo_offset = math.sin(self.animacion_frame * 0.8) * 2
+        # #Ojos
+        # ojo_offset = 0
+        # if self.estado == 'corriendo':
+        #     ojo_offset = math.sin(self.animacion_frame * 0.8) * 2
         
-        ojo_izquierdo_fondo = (self.x + 12 + ojo_offset, self.y + 5)
-        ojo_derecho_fondo = (self.x + self.ancho - 12 + ojo_offset, self.y + 5)
-        ojo_izquierdo_blanco = (self.x + 12 + ojo_offset, self.y + 4)
-        ojo_derecho_blanco = (self.x + self.ancho - 12 + ojo_offset, self.y + 4)
-        pygame.draw.circle(pantalla, (30,30,30), ojo_izquierdo_fondo, 6)
-        pygame.draw.circle(pantalla, (30,30,30), ojo_derecho_fondo, 6)
-        pygame.draw.circle(pantalla, (255,255,255), ojo_izquierdo_blanco, 4)
-        pygame.draw.circle(pantalla, (255,255,255), ojo_derecho_blanco, 4)
+        # ojo_izquierdo_fondo = (self.x + 12 + ojo_offset, self.y + 5)
+        # ojo_derecho_fondo = (self.x + self.ancho - 12 + ojo_offset, self.y + 5)
+        # ojo_izquierdo_blanco = (self.x + 12 + ojo_offset, self.y + 4)
+        # ojo_derecho_blanco = (self.x + self.ancho - 12 + ojo_offset, self.y + 4)
+        # pygame.draw.circle(pantalla, (30,30,30), ojo_izquierdo_fondo, 6)
+        # pygame.draw.circle(pantalla, (30,30,30), ojo_derecho_fondo, 6)
+        # pygame.draw.circle(pantalla, (255,255,255), ojo_izquierdo_blanco, 4)
+        # pygame.draw.circle(pantalla, (255,255,255), ojo_derecho_blanco, 4)
         
         
-        #Pupilas
-        direccion_offset = 2 if self.mira_a_derecha else -2
-        pupila_izquierda = (self.x + 12 + ojo_offset + direccion_offset, self.y + 4)
-        pupila_derecha = (self.x + self.ancho - 12 + ojo_offset + direccion_offset, self.y + 4)
-        pygame.draw.circle(pantalla, (0,0,0), pupila_izquierda, 3)
-        pygame.draw.circle(pantalla, (0,0,0), pupila_derecha, 3)
+        # #Pupilas
+        # direccion_offset = 2 if self.mira_a_derecha else -2
+        # pupila_izquierda = (self.x + 12 + ojo_offset + direccion_offset, self.y + 4)
+        # pupila_derecha = (self.x + self.ancho - 12 + ojo_offset + direccion_offset, self.y + 4)
+        # pygame.draw.circle(pantalla, (0,0,0), pupila_izquierda, 3)
+        # pygame.draw.circle(pantalla, (0,0,0), pupila_derecha, 3)
 
-        #Brillo en los ojos
-        brillo_izq = (self.x + 10 + ojo_offset + direccion_offset, self.y + 2)
-        brillo_der = (self.x + self.ancho - 14 + ojo_offset + direccion_offset, self.y + 2)
-        pygame.draw.circle(pantalla, (255,255,255), brillo_izq, 1)
-        pygame.draw.circle(pantalla, (255,255,255), brillo_der, 1)
+        # #Brillo en los ojos
+        # brillo_izq = (self.x + 10 + ojo_offset + direccion_offset, self.y + 2)
+        # brillo_der = (self.x + self.ancho - 14 + ojo_offset + direccion_offset, self.y + 2)
+        # pygame.draw.circle(pantalla, (255,255,255), brillo_izq, 1)
+        # pygame.draw.circle(pantalla, (255,255,255), brillo_der, 1)
         
-        #Brazos
-        brazo_offset = 0
-        if self.estado == 'corriendo':
-            brazo_offset = math.sin(self.animacion_frame * 0.8) * 15
+        # #Brazos
+        # brazo_offset = 0
+        # if self.estado == 'corriendo':
+        #     brazo_offset = math.sin(self.animacion_frame * 0.8) * 15
             
-        brazo_izq_puntos = [(self.x + 5, self.y + 30), (self.x - 10 - brazo_offset, self.y + 40), (self.x - 5 - brazo_offset, self.y + 45), (self.x + 10, self.y + 35)]
-        pygame.draw.polygon(pantalla, color_sombra, brazo_izq_puntos)
+        # brazo_izq_puntos = [(self.x + 5, self.y + 30), (self.x - 10 - brazo_offset, self.y + 40), (self.x - 5 - brazo_offset, self.y + 45), (self.x + 10, self.y + 35)]
+        # pygame.draw.polygon(pantalla, color_sombra, brazo_izq_puntos)
         
-        brazo_der_puntos = [(self.x + self.ancho - 5, self.y + 30), (self.x + self.ancho + 10 - brazo_offset, self.y + 40), (self.x + self.ancho + 5 + brazo_offset, self.y + 45), (self.x + self.ancho - 10, self.y + 35)]
-        pygame.draw.polygon(pantalla, color_luz, brazo_der_puntos)
+        # brazo_der_puntos = [(self.x + self.ancho - 5, self.y + 30), (self.x + self.ancho + 10 - brazo_offset, self.y + 40), (self.x + self.ancho + 5 + brazo_offset, self.y + 45), (self.x + self.ancho - 10, self.y + 35)]
+        # pygame.draw.polygon(pantalla, color_luz, brazo_der_puntos)
     
-        #Piernas
-        pierna_offset = 0
-        if self.estado == 'corriendo':
-            pierna_offset = math.sin(self.animacion_frame * 0.8) * 10
+        # #Piernas
+        # pierna_offset = 0
+        # if self.estado == 'corriendo':
+        #     pierna_offset = math.sin(self.animacion_frame * 0.8) * 10
             
-        pierna_izq_puntos = [(self.x + 8, self.y + self.alto - 10), (self.x + 3 - pierna_offset, self.y + self.alto + 15), (self.x + 12 - pierna_offset, self.y + self.alto + 15), (self.x + 15, self.y + self.alto - 5)]
-        pygame.draw.polygon(pantalla, color_sombra, pierna_izq_puntos)
+        # pierna_izq_puntos = [(self.x + 8, self.y + self.alto - 10), (self.x + 3 - pierna_offset, self.y + self.alto + 15), (self.x + 12 - pierna_offset, self.y + self.alto + 15), (self.x + 15, self.y + self.alto - 5)]
+        # pygame.draw.polygon(pantalla, color_sombra, pierna_izq_puntos)
         
-        pierna_der_puntos = [(self.x - 8, self.y + self.alto - 10), (self.x - 3 + pierna_offset, self.y + self.alto + 15), (self.x + self.ancho - 12 + pierna_offset, self.y + self.alto + 15), (self.x + self.ancho - 15, self.y + self.alto - 5)]
-        pygame.draw.polygon(pantalla, color_luz, pierna_der_puntos)
+        # pierna_der_puntos = [(self.x - 8, self.y + self.alto - 10), (self.x - 3 + pierna_offset, self.y + self.alto + 15), (self.x + self.ancho - 12 + pierna_offset, self.y + self.alto + 15), (self.x + self.ancho - 15, self.y + self.alto - 5)]
+        # pygame.draw.polygon(pantalla, color_luz, pierna_der_puntos)
         
-        #Zapatos
-        #Izquierdo
-        pygame.draw.rect(pantalla, (50,50,50), (self.x + 5, self.y + self.alto + 10, 12, 8))
-        pygame.draw.rect(pantalla, (30,30,30), (self.x + 5, self.y + self.alto + 10, 12, 3))
+        # #Zapatos
+        # #Izquierdo
+        # pygame.draw.rect(pantalla, (50,50,50), (self.x + 5, self.y + self.alto + 10, 12, 8))
+        # pygame.draw.rect(pantalla, (30,30,30), (self.x + 5, self.y + self.alto + 10, 12, 3))
         
-        #Derecho
-        pygame.draw.rect(pantalla, (50,50,50), (self.x + self.ancho - 17, self.y + self.alto + 10, 12, 8))
-        pygame.draw.rect(pantalla, (30,30,30), (self.x + self.ancho - 17, self.y + self.alto + 10, 12, 3))
-        
-        
-        #Botones
-        #Superior
-        pygame.draw.circle(pantalla, Colores['Jugador_accesorios'], (self.x + self.ancho//2, self.y + 35), 5)
-        pygame.draw.circle(pantalla, (200,200,0), (self.x + self.ancho//2, self.y + 35), 5)
+        # #Derecho
+        # pygame.draw.rect(pantalla, (50,50,50), (self.x + self.ancho - 17, self.y + self.alto + 10, 12, 8))
+        # pygame.draw.rect(pantalla, (30,30,30), (self.x + self.ancho - 17, self.y + self.alto + 10, 12, 3))
         
         
-        #Indicador de balas
-        if self.balas > 0:
-            pygame.draw.circle(pantalla, (200,200,0), (self.x + self.ancho//2, self.y - 8), 7)
-            pygame.draw.circle(pantalla, Colores['Bala'], (self.x + self.ancho // 2, self.y - 8), 5)
-            pygame.draw.circle(pantalla, (250,250,200), (self.x + self.ancho//2 - 2, self.y - 10), 2)
+        # #Botones
+        # #Superior
+        # pygame.draw.circle(pantalla, Colores['Jugador_accesorios'], (self.x + self.ancho//2, self.y + 35), 5)
+        # pygame.draw.circle(pantalla, (200,200,0), (self.x + self.ancho//2, self.y + 35), 5)
+        
+        
+        # #Indicador de balas
+        # if self.balas > 0:
+        #     pygame.draw.circle(pantalla, (200,200,0), (self.x + self.ancho//2, self.y - 8), 7)
+        #     pygame.draw.circle(pantalla, Colores['Bala'], (self.x + self.ancho // 2, self.y - 8), 5)
+        #     pygame.draw.circle(pantalla, (250,250,200), (self.x + self.ancho//2 - 2, self.y - 10), 2)
             
-        #Sombra en el suelo
-        sombra_suelo = pygame.Surface((self.ancho - 10, 8), pygame.SRCALPHA)
-        sombra_suelo.fill((0,0,0,100))
-        pantalla.blit(sombra_suelo, (self.x + 5, self.y + self.alto + 5))
+        # #Sombra en el suelo
+        # sombra_suelo = pygame.Surface((self.ancho - 10, 8), pygame.SRCALPHA)
+        # sombra_suelo.fill((0,0,0,100))
+        # pantalla.blit(sombra_suelo, (self.x + 5, self.y + self.alto + 5))
     def recibir_daño(self):
         #Daño que se hace al personaje principal
         if not self.invencible:

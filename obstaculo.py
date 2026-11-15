@@ -10,6 +10,8 @@ import random
 import math
 import array
 from config import *
+from sprites import dibujar_enemigo
+from arte import texto_contorno
 
 def crear_destruccion(duracion = 0.3, volumen = 0.35):
     config_audio = pygame.mixer.get_init()
@@ -195,57 +197,60 @@ class Obstaculo:
     def dibujar(self,pantalla):
         if not self.activo:
             return
-        color = self.color
-        if self.daño_tiempo > 0 and self.daño_tiempo % 4 < 2:
-            color = (255,255,255)
-            
-        #Tipos de obstaculos
-        #Cubo simple
-        if self.tipo == 'Bloque':
-            pygame.draw.rect(pantalla, color, self.rect)
-            pygame.draw.rect(pantalla, (70,70,70), (self.x + 5, self.y + 5,self.ancho - 10,self.alto - 10), 2)
-            
-            #Grietas en el cubo
-            for i in range(3):
-                x_grieta = self.x + random.randint(10, self.ancho - 10)
-                y_grieta = self.y + random.randint(10, self.alto - 10)
-                largo = random.randint(5, 15)
-                pygame.draw.line(pantalla, (50,50,50), (x_grieta,y_grieta), (x_grieta + largo, y_grieta),2)
         
-        #Andante
-        elif self.tipo == 'Andante':
-            cuerpo_rect = pygame.Rect(self.x, self.y, self.ancho, self.alto - 20)
-            pygame.draw.rect(pantalla, (200,150,150), cuerpo_rect)
+        dibujar_enemigo(pantalla, self)
+        
+        # color = self.color
+        # if self.daño_tiempo > 0 and self.daño_tiempo % 4 < 2:
+        #     color = (255,255,255)
             
-            direccion = 1 if self.velocidad_x > 0 else -1
+        # #Tipos de obstaculos
+        # #Cubo simple
+        # if self.tipo == 'Bloque':
+        #     pygame.draw.rect(pantalla, color, self.rect)
+        #     pygame.draw.rect(pantalla, (70,70,70), (self.x + 5, self.y + 5,self.ancho - 10,self.alto - 10), 2)
             
-            ojo_offset = 5 * direccion
-            ojo_izquierdo = (self.x + 15 + ojo_offset, self.y + 10)
-            ojo_derecho = (self.x + self.ancho - 15 + ojo_offset, self.y + 10)
-            pygame.draw.circle(pantalla, (0,0,0), ojo_izquierdo, 4)
-            pygame.draw.circle(pantalla, (0,0,0), ojo_derecho, 4)
+        #     #Grietas en el cubo
+        #     for i in range(3):
+        #         x_grieta = self.x + random.randint(10, self.ancho - 10)
+        #         y_grieta = self.y + random.randint(10, self.alto - 10)
+        #         largo = random.randint(5, 15)
+        #         pygame.draw.line(pantalla, (50,50,50), (x_grieta,y_grieta), (x_grieta + largo, y_grieta),2)
+        
+        # #Andante
+        # elif self.tipo == 'Andante':
+        #     cuerpo_rect = pygame.Rect(self.x, self.y, self.ancho, self.alto - 20)
+        #     pygame.draw.rect(pantalla, (200,150,150), cuerpo_rect)
             
-            brazo_offset = math.sin(self.animacion_frame * 0.8) * 10
-            pygame.draw.line(pantalla, color, (self.x + 5, self.y + 30), (self.x - 10 - brazo_offset, self.y + 40), 6)
-            pygame.draw.line(pantalla, color, (self.x + self.ancho - 5, self.y + 30), (self.x + self.ancho + 10 + brazo_offset, self.y + 40),6)
+        #     direccion = 1 if self.velocidad_x > 0 else -1
             
-            pierna_offset = math.sin(self.animacion_frame * 0.8) * 15
-            pygame.draw.line(pantalla, (150,50,50), (self.x + 10, self.y + self.alto - 10), (self.x + 5 - pierna_offset, self.y + self.alto + 10), 8)
-            pygame.draw.line(pantalla, (150,50,50), (self.x + self.ancho - 10, self.y + self.alto - 10), (self.x + self.ancho - 5 + pierna_offset, self.y + self.alto + 10), 8)
+        #     ojo_offset = 5 * direccion
+        #     ojo_izquierdo = (self.x + 15 + ojo_offset, self.y + 10)
+        #     ojo_derecho = (self.x + self.ancho - 15 + ojo_offset, self.y + 10)
+        #     pygame.draw.circle(pantalla, (0,0,0), ojo_izquierdo, 4)
+        #     pygame.draw.circle(pantalla, (0,0,0), ojo_derecho, 4)
             
-        #Volador
-        elif self.tipo == 'Volador':
-            puntos=[(self.x + self.ancho//2,self.y), (self.x + self.ancho, self.y + self.alto // 3), (self.x + self.ancho * 0.8, self.y + self.alto), (self.x + self.ancho * 0.2, self.y + self.alto), (self.x, self.y + self.alto // 3)]
-            pygame.draw.polygon(pantalla, color, puntos)
-            ventana_rect = pygame.Rect(self.x + self.ancho // 2 - 10, self.y + 5, 20, 15)
-            pygame.draw.ellipse(pantalla, (200,200,255), ventana_rect)
+        #     brazo_offset = math.sin(self.animacion_frame * 0.8) * 10
+        #     pygame.draw.line(pantalla, color, (self.x + 5, self.y + 30), (self.x - 10 - brazo_offset, self.y + 40), 6)
+        #     pygame.draw.line(pantalla, color, (self.x + self.ancho - 5, self.y + 30), (self.x + self.ancho + 10 + brazo_offset, self.y + 40),6)
             
-            ala_offset = math.sin(self.animacion_frame) * 5
-            pygame.draw.ellipse(pantalla, (150,0,200), (self.x - 5, self.y + 10 - ala_offset,self.ancho + 10, 10))
-            pygame.draw.ellipse(pantalla, (150, 0,200), (self.x - 5, self.y + self.alto - 20 + ala_offset, self.ancho + 10, 10))
+        #     pierna_offset = math.sin(self.animacion_frame * 0.8) * 15
+        #     pygame.draw.line(pantalla, (150,50,50), (self.x + 10, self.y + self.alto - 10), (self.x + 5 - pierna_offset, self.y + self.alto + 10), 8)
+        #     pygame.draw.line(pantalla, (150,50,50), (self.x + self.ancho - 10, self.y + self.alto - 10), (self.x + self.ancho - 5 + pierna_offset, self.y + self.alto + 10), 8)
             
-            propulsor_color = (255,100,0) if self.animacion_frame % 2 == 0 else(255,200,0)
-            pygame.draw.circle(pantalla, propulsor_color, (self.x + self.ancho//2, self.y + self.alto), 8)
+        # #Volador
+        # elif self.tipo == 'Volador':
+        #     puntos=[(self.x + self.ancho//2,self.y), (self.x + self.ancho, self.y + self.alto // 3), (self.x + self.ancho * 0.8, self.y + self.alto), (self.x + self.ancho * 0.2, self.y + self.alto), (self.x, self.y + self.alto // 3)]
+        #     pygame.draw.polygon(pantalla, color, puntos)
+        #     ventana_rect = pygame.Rect(self.x + self.ancho // 2 - 10, self.y + 5, 20, 15)
+        #     pygame.draw.ellipse(pantalla, (200,200,255), ventana_rect)
+            
+        #     ala_offset = math.sin(self.animacion_frame) * 5
+        #     pygame.draw.ellipse(pantalla, (150,0,200), (self.x - 5, self.y + 10 - ala_offset,self.ancho + 10, 10))
+        #     pygame.draw.ellipse(pantalla, (150, 0,200), (self.x - 5, self.y + self.alto - 20 + ala_offset, self.ancho + 10, 10))
+            
+        #     propulsor_color = (255,100,0) if self.animacion_frame % 2 == 0 else(255,200,0)
+        #     pygame.draw.circle(pantalla, propulsor_color, (self.x + self.ancho//2, self.y + self.alto), 8)
             
         #Vida
         if self.vida > 1 and self.vida < 999:

@@ -10,6 +10,7 @@ import pygame
 import random
 import math
 from config import *
+import arte
 from jefe import Jefe
 
 
@@ -172,6 +173,7 @@ class JefeCaballero(Jefe):
             if sombra['tiempo'] <= 30 and (sombra['tiempo'] // 3) % 2 == 1:
                 continue
             self.dibujar_caballero(pantalla, int(sombra['x']), self.suelo_y - self.alto, True, 'caminando')
+            self.dibujar_clon(pantalla, int(sombra['x']))
             
         self.dibujar_cuerpo(pantalla)
         self.dibujar_barra_vida(pantalla)
@@ -179,6 +181,12 @@ class JefeCaballero(Jefe):
         
     def dibujar_cuerpo(self, pantalla, desplazamiento_x = 0, desplazamiento_y = 0):
         self.dibujar_caballero(pantalla, int(self.x) + desplazamiento_x, int(self.y) + desplazamiento_y, False, self.fase)
+        
+    def dibujar_clon(self, pantalla, x):
+        y = self.suelo_y - self.alto
+        def dibujar(s, ox, oy):
+            self.dibujar_caballero(s, ox, oy, True, 'caminando')
+        pantalla.blit(sprite, (z - sox, y - soy))
         
     def dibujar_caballero(self, pantalla, x, y, clon, fase):
         centro = x + self.ancho // 2

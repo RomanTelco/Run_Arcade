@@ -177,13 +177,13 @@ class JefeReina(Jefe):
             pygame.draw.circle(pantalla, (200,240,255), centro, radio)
             pygame.draw.circle(pantalla, (255,255,255), centro, radio // 2)
             
-        if self.estado == 'mueriendo':
+        if self.estado == 'muriendo':
             self.dibujar_muerte(pantalla)
             return
         
         if self.fase == 'reapareciendo':
             centro = (int(self.x + self.ancho / 2), int(self.y + self.alto / 2))
-            pygame.draw.circle(pantalla, (200,240,255), centro, (20- - self.tiempo_fase) * 5 + 5, 3)
+            pygame.draw.circle(pantalla, (200,240,255), centro, (20 - self.tiempo_fase) * 5 + 5, 3)
            
         self.dibujar_cuerpo(pantalla)
         self.dibujar_barra_vida(pantalla)
