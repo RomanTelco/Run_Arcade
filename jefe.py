@@ -348,7 +348,7 @@ class Jefe:
         pygame.draw.ellipse(pantalla, color, (cuerpo.x + 3, cuerpo.y + 2, cuerpo.w - 12, cuerpo.h - 10))
         pygame.draw.ellipse(pantalla, claro, (cuerpo.x + 16, cuerpo.y + 8, 52, 22))
         pygame.draw.ellipse(pantalla, (235,255,235), (cuerpo.x + 22, cuerpo.y + 11, 20, 8))
-        for bx, by, br in ((cuerpo.right - 34, cuerpo.centery + 10, 6), (cuerpo.x + 24, cuerpo.centery + 22, 4), (cuerpo.right - 52, cuerpo.centery + 3, 3)):
+        for bx, by, br in ((cuerpo.right - 34, cuerpo.centery + 10, 6), (cuerpo.x + 24, cuerpo.centery + 22, 4), (cuerpo.right - 52, cuerpo.centery + 30, 3)):
             pygame.draw.circle(pantalla, claro, (bx, by), br, 2)
         
         #Ojos enfadados
@@ -398,20 +398,46 @@ class Jefe:
         if Jefe.fuente_nombre is None: 
             Jefe.fuente_nombre = pygame.font.Font(None, 28)
         
-        barra_ancho = 400
-        barra_alto = 18
+        barra_ancho = 440
+        barra_alto = 20
         barra_x = Ventana_ancho // 2 - barra_ancho // 2
         barra_y = 115
         
+        if not hasattr(self, 'vida_retardo'):
+            self.vida_retardo = float(self.vida_maxima)
+        self.vida_retardo = max(float(max(0, self.vida)), self.vida_retardo - self.vida_maxima * 0.004)
+                
         proporcion = max(0, self.vida) / self.vida_maxima
-        color_barra = (220,50,50) if self.furioso() else (60,200,60)
+        proporcion_retardo = self.vida_retardo / self.vida_maxima
         
+        if self.furioso():
+            color_barra = (255,90,70) if (self.animacion // 10) % 2 == 0 else (225,45,45)
+        else:
+            color_barra = (70,215,90)
+        brillo = (min(255, color_barra[0] + 70), min(255, color_barra[1] + 70), min(255, color_barra[2] + 70))
+        
+        #Marco
+        pygame.draw.rect(pantalla, (14,8,26), (barra_x - 10, barra_y - 32, barra_ancho + 20, barra_alto + 46), border_radius=8)
+        pygame.draw.rect(pantalla, (255,210,70), (barra_x - 10, barra_y - 32, barra_ancho + 20, barra_alto + 46), 3, border_radius=8)
+        
+        #color_barra = (220,50,50) if self.furioso() else (60,200,60)
+        
+        #Barra
         pygame.draw.rect(pantalla, (60,0,0), (barra_x, barra_y, barra_ancho, barra_alto))
+        pygame.draw.rect(pantalla, (255, 255, 255), (barra_x, barra_y, int(barra_ancho* proporcion_retardo), barra_alto))
         pygame.draw.rect(pantalla, color_barra, (barra_x, barra_y, int(barra_ancho * proporcion), barra_alto))
-        pygame.draw.rect(pantalla, (255, 255, 255), (barra_x, barra_y, barra_ancho, barra_alto), 2)
+        pygame.draw.rect(pantalla, brillo, (barra_x, barra_y, int(barra_ancho * proporcion), 5))
         
-        texto = Jefe.fuente_nombre.render(self.nombre, True, (255,255,255))
-        pantalla.blit(texto, (barra_x, barra_y - 22))
+        #Divisiones 
+        if self.vida_maxima <= 40:
+            for i in range(1, int(self.vida_maxima)):
+                dx = barra_x + int(barra_ancho * i / self.vida_maxima)
+                pygame.draw.line(pantalla, (20,10,30), (dx, barra_y), (dx, barra_y + barra_alto), 2)
+        pygame.draw.rect(pantalla, (255,255,255), (barra_x, barra_y, barra_ancho, barra_alto), 2)
+        arte.texto_contorno(pantalla, Jefe.fuente_nombre, self.nombre.upper(), barra_x, barra_y - 26, (255,236,170), (40,10,30), 2, False)
+        
+        # texto = Jefe.fuente_nombre.render(self.nombre, True, (255,255,255))
+        # pantalla.blit(texto, (barra_x, barra_y - 22))
         
     def dibujar_aviso(self, pantalla):
         #Mensaje de que aparece el jefe
@@ -420,44 +446,24 @@ class Jefe:
         
         if Jefe.fuente_aviso is None:
             Jefe.fuente_aviso = pygame.font.Font(None, 72)
-            
-        texto = Jefe.fuente_aviso.render("JEFE FINAL!", True, (255,255,255))
-        sombra = Jefe.fuente_aviso.render("JEFE FINAL!", True, (0,0,0))
-        x = Ventana_ancho // 2 - texto.get_width() // 2
-        pantalla.blit(sombra, (x+3, 223))
-        pantalla.blit(texto, (x,220))
-        
-            
-    
-            
-            
+           
+        aparicion = min(1, self.animacion / 15, (150 - self.animacion) / 20)
+        banda = pygame.Surface((Ventana_ancho, 90), pygame.SRCALPHA)
+        banda.fill((20,0,10,175))
+        desfase = (self.animacion * 4) % 60
+        for bx in range(-120, Ventana_ancho + 60, 60):
+            pygame.draw.polygon(banda, (170,12,36,175), [(bx + desfase, 90), (bx + desfase + 30, 90), (bx + desfase + 60, 0), (bx + desfase + 30, 0)])
+        banda.set_alpha(int(255 * max(0, aparicion)))
+        pantalla.blit(banda, (0,200))
+        color = (255,235,90) if (self.animacion // 6) % 2 == 0 else (255,110,70)
+        arte.texto_contorno(pantalla, Jefe.fuente_aviso, "JEFE FINAL!", Ventana_ancho // 2, 220, color, (30,0,10), 3)
 
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
+Jefe.dibujar_cuerpo = _envolver_cuerpo(Jefe.dibujar_cuerpo)
+Jefe.dibujar = _envolver_dibujar(Jefe.dibujar)       
         
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-            
-        
-    
+       # texto = Jefe.fuente_aviso.render("JEFE FINAL!", True, (255,255,255))
+        # sombra = Jefe.fuente_aviso.render("JEFE FINAL!", True, (0,0,0))
+        # x = Ventana_ancho // 2 - texto.get_width() // 2
+        # pantalla.blit(sombra, (x+3, 223))
+        # pantalla.blit(texto, (x,220))
         
