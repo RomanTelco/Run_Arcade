@@ -14,6 +14,7 @@ from mundo import Mundo
 from nivel import Nivel
 from misil import crear_imagen_misil, dibujar_misil
 import arte
+from menu import MenuPrincipal
 
 #Fichero con las funciones principales del juego
 class Juego:
@@ -48,6 +49,7 @@ class Juego:
         self.fuente_media = pygame.font.Font(None, 48)
         self.fuente_pequeña = pygame.font.Font(None, 36)
         self.fuente_muy_pequeña = pygame.font.Font(None, 24)
+        self.menu = MenuPrincipal()
         
         #Posicion del raton
         self.mouse_pos = (Ventana_ancho//2, Ventana_alto//2)
@@ -95,6 +97,16 @@ class Juego:
                 
             if evento.type == pygame.MOUSEMOTION:
                 self.mouse_pos = self.convertir_coordenadas_raton(evento.pos)
+            
+            if self.estado == 'MENU':
+                accion = self.menu.manejar_evento(evento, self.convertir_coordenadas_raton)
+                if accion == 'iniciar':
+                    self.mensaje_preparacion = Niveles[self.nivel_actual]['Nombre']
+                    self.estado = 'Preparando Nivel'
+                elif accion == 'salir':
+                    pygame.quit()
+                    sys.exit()
+                continue
             
             if evento.type == pygame.KEYDOWN:
                 #Menu del juego
@@ -205,6 +217,7 @@ class Juego:
        
     def dibujar(self):
         #Lo que aparece en pantalla
+        
         if self.estado == 'MENU':
             self.dibujar_menu()
         elif self.estado == 'Preparando Nivel':
@@ -223,49 +236,56 @@ class Juego:
             self.dibujar_juego()
             self.dibujar_completado()
         
+        # if self.mundo:
+        #     self.mundo.controlar_sonido_lluvia(self.estado == 'JUGANDO')
+        
         if self.mundo:
             self.mundo.controlar_sonido_lluvia(self.estado == 'JUGANDO')
-        
+        arte.aplicar_crt(self.pantalla)
+        if self.menu.mostrar_fps:
+            fps = self.fuente_pequeña.render(f"FPS: {int(self.reloj.get_fps())}", True, (255,255,120))
+            self.pantalla.blit(fps, (Ventana_ancho - fps.get_width() - 12, 8))
+            
         self.presentar()
         
     def dibujar_menu(self):
         #Pantalla del menu principal
+        self.menu.dibujar(self.pantalla)
+        # #Fondo
+        # self.pantalla.fill(Colores['Cielo'])
         
-        #Fondo
-        self.pantalla.fill(Colores['Cielo'])
+        # #Titulo
+        # titulo = self.fuente_grande.render("RUN ARCADE", True, Colores['Jugador'])
+        # sombra = self.fuente_grande.render("RUN ARCADE", True, Colores['Texto_sombra'])
+        # self.pantalla.blit(sombra, (Ventana_ancho//2 - titulo.get_width()//2 + 3, 103))
+        # self.pantalla.blit(titulo, (Ventana_ancho//2 - titulo.get_width()//2, 100))
         
-        #Titulo
-        titulo = self.fuente_grande.render("RUN ARCADE", True, Colores['Jugador'])
-        sombra = self.fuente_grande.render("RUN ARCADE", True, Colores['Texto_sombra'])
-        self.pantalla.blit(sombra, (Ventana_ancho//2 - titulo.get_width()//2 + 3, 103))
-        self.pantalla.blit(titulo, (Ventana_ancho//2 - titulo.get_width()//2, 100))
+        # #Subtitulo
+        # subtitulo = self.fuente_media.render("Corre, Salta y Dispara", True, Colores['Texto'])
+        # self.pantalla.blit(subtitulo, (Ventana_ancho//2 - subtitulo.get_width()//2,180))
         
-        #Subtitulo
-        subtitulo = self.fuente_media.render("Corre, Salta y Dispara", True, Colores['Texto'])
-        self.pantalla.blit(subtitulo, (Ventana_ancho//2 - subtitulo.get_width()//2,180))
+        # #Controles
+        # controles = [
+        #     "CONTROLES:",
+        #     "<-- --> / A D: Moverse",
+        #     "ESPACIO / W : Saltar",
+        #     "DOBLE ESPACIO: Dobrle salto",
+        #     "Click Izquierdo: Disparar",
+        #     "P: Pausar juego",
+        #     "ESC : Volver al Menu"
+        #     ]
         
-        #Controles
-        controles = [
-            "CONTROLES:",
-            "<-- --> / A D: Moverse",
-            "ESPACIO / W : Saltar",
-            "DOBLE ESPACIO: Dobrle salto",
-            "Click Izquierdo: Disparar",
-            "P: Pausar juego",
-            "ESC : Volver al Menu"
-            ]
-        
-        for i, texto in enumerate(controles):
-            render = self.fuente_pequeña.render(texto, True, Colores['Texto'])
-            self.pantalla.blit(render, (Ventana_ancho//2 - render.get_width()//2, 250 + i * 35))
+        # for i, texto in enumerate(controles):
+        #     render = self.fuente_pequeña.render(texto, True, Colores['Texto'])
+        #     self.pantalla.blit(render, (Ventana_ancho//2 - render.get_width()//2, 250 + i * 35))
             
-        #Instrucciones para comenzar
-        comenzar = self.fuente_media.render("Presiona ENTER para comenzar", True, Colores['Jugador'])
-        self.pantalla.blit(comenzar, (Ventana_ancho//2 - comenzar.get_width()//2,500))
+        # #Instrucciones para comenzar
+        # comenzar = self.fuente_media.render("Presiona ENTER para comenzar", True, Colores['Jugador'])
+        # self.pantalla.blit(comenzar, (Ventana_ancho//2 - comenzar.get_width()//2,500))
         
-        #Version
-        version = self.fuente_muy_pequeña.render("4 Niveles de Aventura", True, (200,200,200))
-        self.pantalla.blit(version, (Ventana_ancho//2 - version.get_width()//2, 580))
+        # #Version
+        # version = self.fuente_muy_pequeña.render("4 Niveles de Aventura", True, (200,200,200))
+        # self.pantalla.blit(version, (Ventana_ancho//2 - version.get_width()//2, 580))
     
     def dibujar_preparando_nivel(self):
         #Congelamos el nivel
